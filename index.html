@@ -2832,7 +2832,7 @@ function fillAcct(){
   if(!acct.on){
     h=head("계정")+`<p style="margin:0">로그인 기능이 아직 연결되지 않은 화면이에요. 지금은 학습 기록이 <b>이 브라우저에만</b> 저장돼요.</p>
       <div class="acstat"><span class="label">이 브라우저의 기록</span><b>${lvLine(x)}</b></div>
-      <p class="note" style="text-align:left">운영자 안내: 코드 맨 위 <code>FIREBASE_CONFIG</code>에 Firebase 웹 앱 설정을 붙여 넣고 GitHub Pages 같은 웹 주소에 올리면 로그인이 켜져요.</p>`;
+      <p class="note" style="text-align:left">운영자 안내: 같은 폴더의 <code>firebase-config.js</code>에 Firebase 웹 앱 설정을 적어 올리면 로그인이 켜져요.</p>`;
   }else if(acct.state==="loading"||(acct.state==="in"&&acct.busy&&!acct.synced&&!acct.merge)){
     h=head("계정")+`<p class="acwait"><span class="spin" aria-hidden="true"></span>${acct.state==="loading"?"로그인 서비스를 불러오는 중이에요…":"계정 기록을 확인하는 중이에요…"}</p>${msgs}`;
   }else if(acct.state==="error"){
