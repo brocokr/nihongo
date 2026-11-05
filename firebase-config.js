@@ -8,12 +8,12 @@ window.BROCCOLI_FIREBASE = {
   projectId: "broconihongo",
   storageBucket: "broconihongo.firebasestorage.app",
   messagingSenderId: "69012539171",
-  appId: "1:69012539171:web:0c126d8ae38bd829c12e96"
+  appId: "1:69012539171:web:0c126d8ae38bd829c12e96",
   measurementId: "G-85PEVTF840"
 };
 
 // 운영 콘솔에 들어올 수 있는 Google 계정 이메일 (소문자로)
 // Firestore 보안 규칙의 isAdmin() 목록에도 똑같이 적어 주세요.
 window.BROCCOLI_ADMINS = [
-  "you@gmail.com"
+  "10asakii@gmail.com"
 ];
