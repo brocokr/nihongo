@@ -173,6 +173,15 @@ ruby.hide.peek rt{visibility:visible;color:var(--accent)}
 .q{font-family:var(--f-jp);font-size:84px;line-height:1.1;font-weight:500}
 .qtext{font-size:17px;line-height:1.9;font-weight:500}
 .qtext .jp{font-size:22px}
+.alvsteps{display:flex;flex-direction:column;gap:8px}
+.lshead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.lsbar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.lsbar i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .3s}
+.lscard{align-items:center;text-align:center;gap:10px;padding-block:28px}
+.lsword{border:0;background:none;cursor:pointer;font-size:40px;line-height:1.4;color:var(--ink);padding:4px 10px;border-radius:12px}
+.lsword:hover{background:var(--accent-soft)}
+.lsmean{font-size:20px}
+@media (prefers-reduced-motion: reduce){.lsbar i{transition:none}}
 .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
 .choices.col{grid-template-columns:1fr}
 .choice{font-size:16px;font-weight:500;padding:13px 10px;border-radius:14px;border:1px solid var(--line);background:var(--bg);cursor:pointer;line-height:1.7;display:flex;flex-direction:column;align-items:center}
@@ -182,6 +191,7 @@ ruby.hide.peek rt{visibility:visible;color:var(--accent)}
 .choice.no{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
 .choice:disabled{cursor:default}
 .feedback{font-weight:500;min-height:22px}
+.feedback.soft{color:var(--sun)}
 .feedback.ok{color:var(--good)} .feedback.no{color:var(--bad)}
 .exp{font-size:14px;color:var(--muted);text-align:left;width:100%;margin:0}
 .btn{border:0;background:var(--accent);color:var(--bg);font-weight:700;padding:12px 18px;border-radius:12px;cursor:pointer}
@@ -2031,18 +2041,18 @@ function alvQ(it,pool,starter){
   return {q:`<span class="kq kqw">${starter&&hasK?Rf(w,true):pw}</span>뜻은?`,c:[m,...shuffle(ms).slice(0,3)],e:`${pw}${hasK?`(${rd})`:""}는 ‘${m}’예요.`,ref:it.id};
 }
 function renderALV(ch){
-  const t=ch.tier,D=alvLevels(t),body=$("chBody"),outer=backFn,MAXQ=20;$("romTg").hidden=true;
+  const t=ch.tier,D=alvLevels(t),body=$("chBody"),outer=backFn,MAXQ=20,LESSON_MAX=12;$("romTg").hidden=true;
   const first=D.levels[0].L,last=D.levels[D.levels.length-1].L;
   function list(){
     backFn=outer;
     /* a current-level quiz that was already passed before this rule existed still counts */
     {const s0=store.get("alv",{}),L0=lvOf(xp);if(L0>=first&&L0<last&&s0[L0]&&s0[L0].done&&xpFor(L0+1)>xp)gainXP(xpFor(L0+1)-xp)}
     const st=store.get("alv",{}),L=lvOf(xp),done=D.levels.filter(x=>st[x.L]&&st[x.L].done).length,cur=L<first?null:Math.min(L,last);
-    body.innerHTML=`<p class="intro">${LEVELS[t].name} 단계의 Anki 단어 ${D.V}개와 한자 ${D.K}자를 레벨마다 나눴어요. 내 레벨까지의 퀴즈를 풀 수 있고, 지금 레벨 퀴즈를 80% 이상 맞히면 바로 다음 레벨로 올라가요. 틀린 단어는 오답 노트에 모여요.</p>
+    body.innerHTML=`<p class="intro">${LEVELS[t].name} 단계의 Anki 단어 ${D.V}개와 한자 ${D.K}자를 레벨마다 나눴어요. 레벨마다 레슨으로 먼저 익히고, 레벨 테스트를 80% 이상 맞히면 바로 다음 레벨로 올라가요. 레슨에서는 틀려도 괜찮아요. 틀린 단어는 오답 노트에 모여요.</p>
       <div class="tcard"><div class="trow"><span class="label">${ch.range} · ${D.levels.length}개 레벨</span><span class="sub" style="font-variant-numeric:tabular-nums">${done} / ${D.levels.length} 완료</span></div><div class="bar"><i style="width:${done/D.levels.length*100}%"></i></div>
         ${cur==null?`<p class="sub" style="margin:0">Lv.${first}이 되면 첫 퀴즈가 열려요. 지금은 단어 목록만 미리 볼 수 있어요.</p>`:`<button class="btn small" id="alvJump" style="align-self:flex-start">Lv.${cur} 바로 가기</button>`}</div>
       <div class="kdlist">${D.levels.map(x=>{const r=st[x.L],open=x.L<=L,nv=x.items.filter(i=>i.kind==="v").length,nk=x.items.length-nv;
-        const chip=r&&r.done?`<span class="kdchip ok">완료 · ${r.best}/${r.n}</span>`:x.L===cur?`<span class="kdchip now">지금 레벨</span>`:open?`<span class="kdchip">풀 수 있어요</span>`:x.L===L+1?`<span class="kdchip">Lv.${L} 통과하면 열려요</span>`:`<span class="kdchip">Lv.${x.L}에 열려요</span>`;
+        const chip=r&&r.done?`<span class="kdchip ok">완료 · ${r.best}/${r.n}</span>`:x.L===cur?`<span class="kdchip now">${store.get("alvLesson",{})[x.L]?"테스트만 남았어요":"지금 레벨 · 레슨부터"}</span>`:open?`<span class="kdchip">풀 수 있어요</span>`:x.L===L+1?`<span class="kdchip">Lv.${L} 통과하면 열려요</span>`:`<span class="kdchip">Lv.${x.L}에 열려요</span>`;
         const pv=x.items.filter(i=>i.kind==="v").slice(0,4).map(i=>plain(i.c[0])).join("・")||x.items.slice(0,6).map(i=>i.c[0]).join(" ");
         return `<button class="kdrow${open?"":" locked"}${x.L===cur?" next":""}" data-lv="${x.L}"${x.L===cur?' id="alvNow"':""}><span class="kdday">Lv<b>${x.L}</b></span><span class="kdtxt"><b>${nv?`단어 ${nv}`:""}${nv&&nk?" · ":""}${nk?`한자 ${nk}`:""}</b><span class="jp alvpv">${pv}</span></span>${chip}</button>`}).join("")}</div>`;
     body.querySelector(".kdlist").onclick=e=>{const b=e.target.closest(".kdrow");if(b)learn(+b.dataset.lv)};
@@ -2053,10 +2063,63 @@ function renderALV(ch){
     backFn=()=>{list();window.scrollTo(0,0)};
     const x=D.levels.find(y=>y.L===Lv),open=Lv<=lvOf(xp),n=Math.min(MAXQ,x.items.length);
     body.innerHTML=`<span class="label">${LEVELS[t].name} · Lv.${Lv} · ${x.items.length}개</span>
-      <p class="intro" style="margin:0">퀴즈 전에 한 번 훑어보세요. 단어를 누르면 소리가 나요.</p>
-      <div class="box alvbox">${x.items.map(i=>i.kind==="k"?`<div class="alvit"><b class="jp alvk">${i.c[0]}</b><span>${i.c[1]}</span></div>`:`<button class="alvit" data-say="${esc(reading(i.c[0]))}"><span class="jp alvw">${Rf(i.c[0],true)}</span><span>${i.c[1]}</span></button>`).join("")}</div>
-      ${open?`<button class="btn wide" id="alvGo">퀴즈 풀기 · ${n}문제</button>${x.items.length>MAXQ?`<p class="note">${x.items.length}개 중 ${MAXQ}개가 무작위로 나와요.</p>`:""}`:`<button class="btn wide" disabled style="opacity:.5">Lv.${Lv}이 되면 퀴즈가 열려요</button>`}`;
-    if(open)$("alvGo").onclick=()=>quiz(Lv);window.scrollTo(0,0);
+      ${open?(()=>{const les=store.get("alvLesson",{})[Lv],passed=(store.get("alv",{})[Lv]||{}).done,canTest=les||passed;
+        return `<div class="alvsteps"><button class="btn wide" id="alvLesson">${les?"레슨 다시 하기":"1. 레슨 시작"} · ${Math.min(LESSON_MAX,x.items.length)}개 익히기</button>
+          ${canTest?`<button class="btn wide${les?"":" ghost"}" id="alvGo">${les?"2. ":""}레벨 테스트 · ${n}문제</button>`:`<button class="btn wide ghost" disabled style="opacity:.55">2. 레벨 테스트 · 레슨을 끝내면 열려요</button>`}</div>
+          <p class="note">레슨은 틀려도 괜찮아요. 틀린 문제는 정답을 보여 주고 뒤에서 한 번 더 나와요. 레벨 테스트는 80% 이상 맞히면 다음 레벨로 올라가요.${x.items.length>MAXQ?` 테스트는 ${x.items.length}개 중 ${MAXQ}개가 무작위로 나와요.`:""}</p>`})():`<button class="btn wide" disabled style="opacity:.5">Lv.${Lv}이 되면 열려요</button>`}
+      <p class="intro" style="margin:0">이번 레벨에서 익힐 단어예요. 단어를 누르면 소리가 나요.</p>
+      <div class="box alvbox">${x.items.map(i=>i.kind==="k"?`<div class="alvit"><b class="jp alvk">${i.c[0]}</b><span>${i.c[1]}</span></div>`:`<button class="alvit" data-say="${esc(reading(i.c[0]))}"><span class="jp alvw">${Rf(i.c[0],true)}</span><span>${i.c[1]}</span></button>`).join("")}</div>`;
+    if(open){$("alvLesson").onclick=()=>lesson(Lv);if($("alvGo"))$("alvGo").onclick=()=>quiz(Lv)}window.scrollTo(0,0);
+  }
+  /* lesson: learn 4 items, practice them, wrong answers come back until right; no pass/fail */
+  function lesson(Lv){
+    backFn=()=>learn(Lv);
+    const x=D.levels.find(y=>y.L===Lv),its=shuffle(x.items).slice(0,LESSON_MAX),starter=isStarter(),groups=[];
+    for(let i=0;i<its.length;i+=4)groups.push(its.slice(i,i+4));
+    let g=0,step="teach",ti=0,queue=[],steps=0,first=0,firstOK=0;const total=its.length*2,tried=new Set();
+    const bar=()=>`<div class="lsbar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${steps}"><i style="width:${Math.min(100,steps/total*100)}%"></i></div>`;
+    const head=t=>`<div class="lshead"><span class="label">${LEVELS[t2].name} · Lv.${Lv} 레슨</span><span class="sub">${t}</span></div>${bar()}`,t2=t;
+    function teach(){
+      const it=groups[g][ti],k=it.kind==="k",w=it.c[0];
+      body.innerHTML=head(`새 ${k?"한자":"단어"} ${ti+1} / ${groups[g].length}`)+`<div class="card lscard">
+        ${k?`<b class="kq">${w}</b>`:`<button class="lsword" data-say="${esc(reading(w))}" aria-label="소리 듣기"><span class="jp">${Rf(w,true)}</span></button>${starter?`<span class="sub">${esc(romaji(reading(w)))}</span>`:""}`}
+        <b class="lsmean">${esc(it.c[1])}</b>
+        ${k&&it.c[4]?`<span class="sub">${esc(String(it.c[4]).replace("묶음: ",""))}</span>`:""}
+        ${!k?`<span class="sub">눌러서 소리를 들어 보세요</span>`:""}</div>
+        <button class="btn wide" id="lsNext">${ti<groups[g].length-1?"다음":"이제 연습해 볼까요?"}</button>`;
+      $("lsNext").onclick=()=>{steps++;if(ti<groups[g].length-1){ti++;teach()}else{step="practice";queue=shuffle(groups[g].map(i=>({it:i,q:alvQ(i,D.pool,starter)})));practice()}};
+      window.scrollTo(0,0);
+    }
+    function practice(){
+      const cur=queue[0],q=cur.q,opts=shuffle(q.c.map((t,k)=>({t,ok:k===0}))),isFirst=!tried.has(cur.it);
+      body.innerHTML=head(`연습 · 남은 문제 ${queue.length}`)+`<div class="card"><div class="qtext">${R(q.q)}</div>
+        <div class="choices${q.c.some(t=>textOf(t).length>12)?" col":""}" id="lsOpts">${opts.map((o,i)=>`<button class="choice" data-i="${i}"><span class="jp">${o.t}</span></button>`).join("")}</div>
+        <div class="feedback" id="lsFb"></div><p class="sub" id="lsExp" hidden></p></div>
+        <button class="btn wide" id="lsGo" hidden>다음</button>`;
+      $("lsOpts").onclick=e=>{const b=e.target.closest(".choice");if(!b)return;const o=opts[+b.dataset.i];
+        [...$("lsOpts").children].forEach((c,k)=>{c.disabled=true;if(opts[k].ok)c.classList.add("ok")});
+        if(isFirst){tried.add(cur.it);first++;if(o.ok)firstOK++}
+        markStudy("quiz",o.ok);
+        if(o.ok){$("lsFb").textContent="정답이에요!";$("lsFb").className="feedback ok";steps++;queue.shift()}
+        else{b.classList.add("no");$("lsFb").textContent="괜찮아요, 정답을 확인하고 뒤에서 한 번 더 풀어 봐요.";$("lsFb").className="feedback soft";
+          if(q.ref){wrong.c[q.ref]=(wrong.c[q.ref]||0)+1;saveWrong()}
+          queue.push({it:cur.it,q:alvQ(cur.it,D.pool,starter)});queue.shift()}
+        if(q.e){$("lsExp").textContent=q.e;$("lsExp").hidden=false}
+        $("lsGo").hidden=false;$("lsGo").focus();
+      };
+      $("lsGo").onclick=()=>{if(queue.length)practice();else if(g<groups.length-1){g++;ti=0;step="teach";teach()}else finish()};
+      window.scrollTo(0,0);
+    }
+    function finish(){
+      const L=store.get("alvLesson",{});L[Lv]=true;store.set("alvLesson",L);
+      backFn=()=>learn(Lv);
+      body.innerHTML=`<div class="card"><span class="label">${LEVELS[t].name} · Lv.${Lv} 레슨</span><div class="result" style="color:var(--good)">레슨 완료</div>
+        <p style="margin:0">${its.length}개를 익혔어요. 처음 풀었을 때 ${firstOK} / ${first}개를 맞혔어요. 이제 레벨 테스트를 볼 수 있어요.</p>
+        <button class="btn wide" id="lsTest">레벨 테스트 보기</button>
+        <div style="display:flex;gap:8px;width:100%"><button class="btn ghost" id="lsAgain" style="flex:1">레슨 다시 하기</button><button class="btn ghost" id="lsList" style="flex:1">레벨 목록</button></div></div>`;
+      $("lsTest").onclick=()=>quiz(Lv);$("lsAgain").onclick=()=>lesson(Lv);$("lsList").onclick=()=>{list();window.scrollTo(0,0)};window.scrollTo(0,0);
+    }
+    teach();
   }
   function quiz(Lv){
     backFn=()=>learn(Lv);
@@ -2829,7 +2892,7 @@ async function acctInit(){
   acct.state="loading";acct.err="";drawAcct();
   try{
     const {U,auth}=await fbLoad();
-    acctLoadCfg();
+    acctLoadCfg();countVisit();
     U.getRedirectResult(auth).catch(e=>{acct.err=authMsg(e);drawAcct()});
     U.onAuthStateChanged(auth,u=>{
       const prev=acct.user&&acct.user.uid;acct.user=u||null;acct.state=u?"in":"out";
@@ -2841,6 +2904,14 @@ async function acctInit(){
 addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")acctPush()});
 addEventListener("pagehide",()=>acctPush());
 
+/* visit counter: page views every load, a visit once per browser session, a new visitor once per device */
+function countVisit(){
+  try{const {F,db}=acct.fb,d=new Date(),key=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+    let v=0,nu=0;try{if(!sessionStorage.getItem(ACCT_PFX+"sess")){sessionStorage.setItem(ACCT_PFX+"sess","1");v=1}}catch(e){}
+    if(!ameta.get("seen",false)){ameta.set("seen",true);nu=1}
+    F.setDoc(F.doc(db,"visits",key),{day:key,pv:F.increment(1),v:F.increment(v),nu:F.increment(nu)},{merge:true}).catch(()=>{});
+  }catch(e){}
+}
 async function acctLoadCfg(){
   try{const {F,db}=acct.fb,s=await F.getDoc(F.doc(db,"config","app")),c=s.exists()?s.data():{};
     ameta.set("cfg",c);appCfg=c;if(view==="home"&&!$("home").hidden)renderHome()}catch(e){}
