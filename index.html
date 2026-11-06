@@ -2048,11 +2048,11 @@ function renderALV(ch){
     /* a current-level quiz that was already passed before this rule existed still counts */
     {const s0=store.get("alv",{}),L0=lvOf(xp);if(L0>=first&&L0<last&&s0[L0]&&s0[L0].done&&xpFor(L0+1)>xp)gainXP(xpFor(L0+1)-xp)}
     const st=store.get("alv",{}),L=lvOf(xp),done=D.levels.filter(x=>st[x.L]&&st[x.L].done).length,cur=L<first?null:Math.min(L,last);
-    body.innerHTML=`<p class="intro">${LEVELS[t].name} 단계의 Anki 단어 ${D.V}개와 한자 ${D.K}자를 레벨마다 나눴어요. 레벨마다 레슨으로 먼저 익히고, 레벨 테스트를 80% 이상 맞히면 바로 다음 레벨로 올라가요. 레슨에서는 틀려도 괜찮아요. 틀린 단어는 오답 노트에 모여요.</p>
+    body.innerHTML=`<p class="intro">${LEVELS[t].name} 단계의 Anki 단어 ${D.V}개와 한자 ${D.K}자를 레벨마다 나눴어요. 레슨으로 먼저 익혀도 되고 바로 레벨 테스트를 봐도 돼요. 테스트를 70% 이상 맞히면 바로 다음 레벨로 올라가요. 레슨에서는 틀려도 괜찮아요. 틀린 단어는 오답 노트에 모여요.</p>
       <div class="tcard"><div class="trow"><span class="label">${ch.range} · ${D.levels.length}개 레벨</span><span class="sub" style="font-variant-numeric:tabular-nums">${done} / ${D.levels.length} 완료</span></div><div class="bar"><i style="width:${done/D.levels.length*100}%"></i></div>
         ${cur==null?`<p class="sub" style="margin:0">Lv.${first}이 되면 첫 퀴즈가 열려요. 지금은 단어 목록만 미리 볼 수 있어요.</p>`:`<button class="btn small" id="alvJump" style="align-self:flex-start">Lv.${cur} 바로 가기</button>`}</div>
       <div class="kdlist">${D.levels.map(x=>{const r=st[x.L],open=x.L<=L,nv=x.items.filter(i=>i.kind==="v").length,nk=x.items.length-nv;
-        const chip=r&&r.done?`<span class="kdchip ok">완료 · ${r.best}/${r.n}</span>`:x.L===cur?`<span class="kdchip now">${store.get("alvLesson",{})[x.L]?"테스트만 남았어요":"지금 레벨 · 레슨부터"}</span>`:open?`<span class="kdchip">풀 수 있어요</span>`:x.L===L+1?`<span class="kdchip">Lv.${L} 통과하면 열려요</span>`:`<span class="kdchip">Lv.${x.L}에 열려요</span>`;
+        const chip=r&&r.done?`<span class="kdchip ok">완료 · ${r.best}/${r.n}</span>`:x.L===cur?`<span class="kdchip now">${store.get("alvLesson",{})[x.L]?"레슨 완료 · 테스트":"지금 레벨"}</span>`:open?`<span class="kdchip">풀 수 있어요</span>`:x.L===L+1?`<span class="kdchip">Lv.${L} 통과하면 열려요</span>`:`<span class="kdchip">Lv.${x.L}에 열려요</span>`;
         const pv=x.items.filter(i=>i.kind==="v").slice(0,4).map(i=>plain(i.c[0])).join("・")||x.items.slice(0,6).map(i=>i.c[0]).join(" ");
         return `<button class="kdrow${open?"":" locked"}${x.L===cur?" next":""}" data-lv="${x.L}"${x.L===cur?' id="alvNow"':""}><span class="kdday">Lv<b>${x.L}</b></span><span class="kdtxt"><b>${nv?`단어 ${nv}`:""}${nv&&nk?" · ":""}${nk?`한자 ${nk}`:""}</b><span class="jp alvpv">${pv}</span></span>${chip}</button>`}).join("")}</div>`;
     body.querySelector(".kdlist").onclick=e=>{const b=e.target.closest(".kdrow");if(b)learn(+b.dataset.lv)};
@@ -2063,10 +2063,10 @@ function renderALV(ch){
     backFn=()=>{list();window.scrollTo(0,0)};
     const x=D.levels.find(y=>y.L===Lv),open=Lv<=lvOf(xp),n=Math.min(MAXQ,x.items.length);
     body.innerHTML=`<span class="label">${LEVELS[t].name} · Lv.${Lv} · ${x.items.length}개</span>
-      ${open?(()=>{const les=store.get("alvLesson",{})[Lv],passed=(store.get("alv",{})[Lv]||{}).done,canTest=les||passed;
+      ${open?(()=>{const les=store.get("alvLesson",{})[Lv];
         return `<div class="alvsteps"><button class="btn wide" id="alvLesson">${les?"레슨 다시 하기":"1. 레슨 시작"} · ${Math.min(LESSON_MAX,x.items.length)}개 익히기</button>
-          ${canTest?`<button class="btn wide${les?"":" ghost"}" id="alvGo">${les?"2. ":""}레벨 테스트 · ${n}문제</button>`:`<button class="btn wide ghost" disabled style="opacity:.55">2. 레벨 테스트 · 레슨을 끝내면 열려요</button>`}</div>
-          <p class="note">레슨은 틀려도 괜찮아요. 틀린 문제는 정답을 보여 주고 뒤에서 한 번 더 나와요. 레벨 테스트는 80% 이상 맞히면 다음 레벨로 올라가요.${x.items.length>MAXQ?` 테스트는 ${x.items.length}개 중 ${MAXQ}개가 무작위로 나와요.`:""}</p>`})():`<button class="btn wide" disabled style="opacity:.5">Lv.${Lv}이 되면 열려요</button>`}
+          <button class="btn wide${les?"":" ghost"}" id="alvGo">${les?"2. 레벨 테스트":"2. 레벨 테스트 (레슨 없이 바로 보기)"} · ${n}문제</button></div>
+          <p class="note">레슨은 틀려도 괜찮아요. 틀린 문제는 정답을 보여 주고 뒤에서 한 번 더 나와요. 레벨 테스트는 70% 이상 맞히면 다음 레벨로 올라가요. 자신 있으면 레슨 없이 바로 테스트를 봐도 돼요.${x.items.length>MAXQ?` 테스트는 ${x.items.length}개 중 ${MAXQ}개가 무작위로 나와요.`:""}</p>`})():`<button class="btn wide" disabled style="opacity:.5">Lv.${Lv}이 되면 열려요</button>`}
       <p class="intro" style="margin:0">이번 레벨에서 익힐 단어예요. 단어를 누르면 소리가 나요.</p>
       <div class="box alvbox">${x.items.map(i=>i.kind==="k"?`<div class="alvit"><b class="jp alvk">${i.c[0]}</b><span>${i.c[1]}</span></div>`:`<button class="alvit" data-say="${esc(reading(i.c[0]))}"><span class="jp alvw">${Rf(i.c[0],true)}</span><span>${i.c[1]}</span></button>`).join("")}</div>`;
     if(open){$("alvLesson").onclick=()=>lesson(Lv);if($("alvGo"))$("alvGo").onclick=()=>quiz(Lv)}window.scrollTo(0,0);
@@ -2127,7 +2127,7 @@ function renderALV(ch){
     runQuiz(its.map(i=>alvQ(i,D.pool,starter)),{noRom:true,
       onAnswer:(q,ok)=>{if(!ok&&q.ref){wrong.c[q.ref]=(wrong.c[q.ref]||0)+1;saveWrong()}},
       onDone:(score,wr,n)=>{
-        const st=store.get("alv",{}),prev=st[Lv]||{},need=Math.ceil(n*.8),pass=score>=need;
+        const st=store.get("alv",{}),prev=st[Lv]||{},need=Math.ceil(n*.7),pass=score>=need;
         st[Lv]={done:prev.done||pass,best:Math.max(prev.best||0,score),n,date:dstr(new Date())};store.set("alv",st);
         /* passing the quiz of your current level moves you straight to the next level */
         const up=pass&&Lv>=lvOf(xp)&&xpFor(Lv+1)>xp;if(up)gainXP(xpFor(Lv+1)-xp);
