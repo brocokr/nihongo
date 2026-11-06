@@ -41,6 +41,27 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;fl
 h1{margin:0;font-family:var(--f-jp);font-size:25px;font-weight:700}
 h1 span{color:var(--accent)}
 [hidden]{display:none!important}
+.tb-r{display:flex;align-items:center;gap:6px}
+.acctbtn,.cashbtn{white-space:nowrap}
+@media (max-width:380px){.redo{padding:4px 8px;font-size:11px}.redo svg{display:none}.cashbtn{padding:4px 8px}}
+.cashbtn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface);color:var(--sun);border-radius:999px;padding:4px 10px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;min-height:32px}
+.cashbtn .num{color:var(--ink);font-variant-numeric:tabular-nums}
+.packs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.pack{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:12px 6px;font:inherit;cursor:pointer}
+.pack b{font-size:16px}.pack span{font-size:12px;color:var(--muted)}
+.pack i{font-style:normal;position:absolute;top:-9px;right:6px;font-size:10.5px;font-weight:700;background:var(--sun);color:var(--surface);border-radius:999px;padding:1px 7px}
+.pack:hover{border-color:var(--accent)}
+.paym{border:0;padding:0;margin:0;display:flex;gap:16px;flex-wrap:wrap}
+.paym legend{margin-bottom:6px;padding:0}
+.paym label{display:flex;align-items:center;gap:6px;font-size:14px}
+.txl{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column}
+.txl li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.txl li small{display:block;color:var(--muted);font-size:11.5px}
+.txl .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.txl .pos{color:var(--good);font-weight:700}.txl .neg{color:var(--bad);font-weight:700}
+.wlinfo summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--accent)}
+.wlinfo ul{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.st-fast{background:var(--sun-soft);color:var(--sun)}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:-6px}
 .redo{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:4px 10px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;min-height:28px;white-space:nowrap}
 .redo:hover{color:var(--accent);border-color:var(--accent)}
@@ -534,7 +555,7 @@ body.pron-off .rom,body.pron-off .han,body.pron-rom .han,body.pron-han .rom:not(
   <section id="onboard" hidden><div id="obBody" class="stack"></div></section>
 
   <section id="home" hidden>
-    <div class="topbar"><button class="redo" id="redoBtn" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>배치 경기 다시 하기</button><button class="acctbtn" id="acctBtn" type="button" data-s="off"></button></div>
+    <div class="topbar"><button class="redo" id="redoBtn" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>배치 경기 다시 하기</button><div class="tb-r"><button class="cashbtn" id="cashBtn" type="button" aria-label="내 캐시"></button><button class="acctbtn" id="acctBtn" type="button" data-s="off"></button></div></div>
     <header>
       <h1>broco <span>Nihongo</span></h1>
       <span class="pill" id="streak">오늘 첫 학습 전</span>
@@ -1435,7 +1456,7 @@ function promoBurst(el){
     P.forEach(p=>{p.vy+=.16;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;ctx.globalAlpha=Math.max(0,1-k*k);ctx.fillStyle=p.c;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);if(p.sq)ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);else{ctx.beginPath();ctx.arc(0,0,p.s/2.4,0,Math.PI*2);ctx.fill()}ctx.restore()});
     requestAnimationFrame(frame)})(t0);
 }
-function gainXP(n){const b=lvOf(xp),bt=tierOf(b),br=rankOf(b);xp+=n;store.set("xp",xp);const a=lvOf(xp);if(a>b){const at=tierOf(a),ar=rankOf(a),msg=[`레벨 업! Lv.${a}`];if(ar!==br){msg.push(`${ar.name} 티어 승급`);queuePromo(br,ar,a)}if(at!==bt){tierView=null;store.set("tierView",null);msg.push(`${LEVELS[at].name} 단계가 열렸어요`)}setTimeout(()=>toast(msg.join(" · ")),400)}}
+function gainXP(n){const b=lvOf(xp),bt=tierOf(b),br=rankOf(b);xp+=n;store.set("xp",xp);const a=lvOf(xp);if(a>b){const at=tierOf(a),ar=rankOf(a),msg=[`레벨 업! Lv.${a}`];if(ar!==br){msg.push(`${ar.name} 티어 승급`);queuePromo(br,ar,a)}if(at!==bt){tierView=null;store.set("tierView",null);msg.push(`${LEVELS[at].name} 단계가 열렸어요`);earnOnce("stage_"+at,EARN.stage,`${LEVELS[at].name} 단계 진입`)}setTimeout(()=>toast(msg.join(" · ")),400)}}
 function startAt(L){if(xpFor(L)>xp){xp=xpFor(L);store.set("xp",xp)}const own=tierOf(lvOf(xp)),t=tierOf(L);tierView=t===own?null:t;store.set("tierView",tierView);syncTier()}
 const isStarter=()=>level==="kana"||level==="beg";
 let fav=store.get("fav",{}),myDecks=store.get("decks",[]),goal=store.get("goal",20),log=store.get("log",{}),lastAct=0,backFn=null,pron=store.get("pron",store.get("romOn",true)?"rom":"off");
@@ -1651,10 +1672,10 @@ function markStudy(kind,ok){
     gainXP(kind==="quiz"?(ok?2:1):1);
     if(kind==="card")d.c++;else if(kind==="quiz"){d.q++;if(ok)d.qc++}else if(kind==="write")d.w++;
     d.s+=lastAct&&now-lastAct<120000?Math.round((now-lastAct)/1000):15;lastAct=now;store.set("log",log);
-    if(before<goal&&dayTotal(d)>=goal)setTimeout(()=>toast(`오늘 목표 ${goal}개 달성! 내일도 이어가 볼까요?`),300)}
+    if(before<goal&&dayTotal(d)>=goal){setTimeout(()=>toast(`오늘 목표 ${goal}개 달성! 내일도 이어가 볼까요?`),300);earnOnce("goal_"+t,EARN.goal,"하루 목표 달성")}}
 }
 /* streak: +1 day when the first quiz of the day is completed */
-function bumpStreak(){const s=store.get("streak",{last:"",n:0}),t=dstr(new Date()),y=dstr(new Date(Date.now()-DAY));if(s.last===t)return {first:false,before:s.n,n:s.n};const before=s.last===y?s.n:0;s.n=before+1;s.last=t;store.set("streak",s);drawStreak();return {first:true,before,n:s.n}}
+function bumpStreak(){const s=store.get("streak",{last:"",n:0}),t=dstr(new Date()),y=dstr(new Date(Date.now()-DAY));if(s.last===t)return {first:false,before:s.n,n:s.n};const before=s.last===y?s.n:0;s.n=before+1;s.last=t;store.set("streak",s);drawStreak();if(s.n%7===0)earnOnce("streak_"+t,EARN.streak7,`연속 ${s.n}일 학습`);return {first:true,before,n:s.n}}
 function drawStreak(){const s=store.get("streak",{last:"",n:0}),t=dstr(new Date()),y=dstr(new Date(Date.now()-DAY));$("streak").textContent=s.last===t&&s.n?`연속 ${s.n}일 학습`:s.last===y&&s.n?`연속 ${s.n}일 · 오늘 퀴즈 전`:"오늘 첫 퀴즈 전"}
 
 /* ---------- home ---------- */
@@ -2013,12 +2034,15 @@ function renderALV(ch){
   const t=ch.tier,D=alvLevels(t),body=$("chBody"),outer=backFn,MAXQ=20;$("romTg").hidden=true;
   const first=D.levels[0].L,last=D.levels[D.levels.length-1].L;
   function list(){
-    backFn=outer;const st=store.get("alv",{}),L=lvOf(xp),done=D.levels.filter(x=>st[x.L]&&st[x.L].done).length,cur=L<first?null:Math.min(L,last);
-    body.innerHTML=`<p class="intro">${LEVELS[t].name} 단계의 Anki 단어 ${D.V}개와 한자 ${D.K}자를 레벨마다 나눴어요. 내 레벨까지의 퀴즈를 풀 수 있고, 80% 이상 맞히면 완료예요. 틀린 단어는 오답 노트에 모여요.</p>
+    backFn=outer;
+    /* a current-level quiz that was already passed before this rule existed still counts */
+    {const s0=store.get("alv",{}),L0=lvOf(xp);if(L0>=first&&L0<last&&s0[L0]&&s0[L0].done&&xpFor(L0+1)>xp)gainXP(xpFor(L0+1)-xp)}
+    const st=store.get("alv",{}),L=lvOf(xp),done=D.levels.filter(x=>st[x.L]&&st[x.L].done).length,cur=L<first?null:Math.min(L,last);
+    body.innerHTML=`<p class="intro">${LEVELS[t].name} 단계의 Anki 단어 ${D.V}개와 한자 ${D.K}자를 레벨마다 나눴어요. 내 레벨까지의 퀴즈를 풀 수 있고, 지금 레벨 퀴즈를 80% 이상 맞히면 바로 다음 레벨로 올라가요. 틀린 단어는 오답 노트에 모여요.</p>
       <div class="tcard"><div class="trow"><span class="label">${ch.range} · ${D.levels.length}개 레벨</span><span class="sub" style="font-variant-numeric:tabular-nums">${done} / ${D.levels.length} 완료</span></div><div class="bar"><i style="width:${done/D.levels.length*100}%"></i></div>
         ${cur==null?`<p class="sub" style="margin:0">Lv.${first}이 되면 첫 퀴즈가 열려요. 지금은 단어 목록만 미리 볼 수 있어요.</p>`:`<button class="btn small" id="alvJump" style="align-self:flex-start">Lv.${cur} 바로 가기</button>`}</div>
       <div class="kdlist">${D.levels.map(x=>{const r=st[x.L],open=x.L<=L,nv=x.items.filter(i=>i.kind==="v").length,nk=x.items.length-nv;
-        const chip=r&&r.done?`<span class="kdchip ok">완료 · ${r.best}/${r.n}</span>`:x.L===cur?`<span class="kdchip now">지금 레벨</span>`:open?`<span class="kdchip">풀 수 있어요</span>`:`<span class="kdchip">Lv.${x.L}에 열려요</span>`;
+        const chip=r&&r.done?`<span class="kdchip ok">완료 · ${r.best}/${r.n}</span>`:x.L===cur?`<span class="kdchip now">지금 레벨</span>`:open?`<span class="kdchip">풀 수 있어요</span>`:x.L===L+1?`<span class="kdchip">Lv.${L} 통과하면 열려요</span>`:`<span class="kdchip">Lv.${x.L}에 열려요</span>`;
         const pv=x.items.filter(i=>i.kind==="v").slice(0,4).map(i=>plain(i.c[0])).join("・")||x.items.slice(0,6).map(i=>i.c[0]).join(" ");
         return `<button class="kdrow${open?"":" locked"}${x.L===cur?" next":""}" data-lv="${x.L}"${x.L===cur?' id="alvNow"':""}><span class="kdday">Lv<b>${x.L}</b></span><span class="kdtxt"><b>${nv?`단어 ${nv}`:""}${nv&&nk?" · ":""}${nk?`한자 ${nk}`:""}</b><span class="jp alvpv">${pv}</span></span>${chip}</button>`}).join("")}</div>`;
     body.querySelector(".kdlist").onclick=e=>{const b=e.target.closest(".kdrow");if(b)learn(+b.dataset.lv)};
@@ -2042,10 +2066,12 @@ function renderALV(ch){
       onDone:(score,wr,n)=>{
         const st=store.get("alv",{}),prev=st[Lv]||{},need=Math.ceil(n*.8),pass=score>=need;
         st[Lv]={done:prev.done||pass,best:Math.max(prev.best||0,score),n,date:dstr(new Date())};store.set("alv",st);
+        /* passing the quiz of your current level moves you straight to the next level */
+        const up=pass&&Lv>=lvOf(xp)&&xpFor(Lv+1)>xp;if(up)gainXP(xpFor(Lv+1)-xp);
         const nx=D.levels.find(y=>y.L===Lv+1),nextOpen=nx&&nx.L<=lvOf(xp);
         backFn=()=>{list();window.scrollTo(0,0)};
         body.innerHTML=`<div class="card"><span class="label">${LEVELS[t].name} · Lv.${Lv}</span><div class="result" style="color:${pass?"var(--good)":"var(--bad)"}">${score} / ${n}</div>
-          <p style="margin:0">${pass?"레벨 퀴즈 완료!":`${need}문제 이상 맞히면 완료예요. 단어를 한 번 더 보고 다시 풀어 볼까요?`}${wr.length?" 틀린 단어는 오답 노트에 모았어요.":""}</p>
+          <p style="margin:0">${pass?(up?`레벨 퀴즈 통과! Lv.${Lv+1}로 올라갔어요.`:"레벨 퀴즈 완료!"):`${need}문제 이상 맞히면 다음 레벨로 올라가요. 단어를 한 번 더 보고 다시 풀어 볼까요?`}${wr.length?" 틀린 단어는 오답 노트에 모았어요.":""}</p>
           ${wr.length?`<div class="review"><span class="label">틀린 문제</span>${wr.map(q=>`<div>${q.q.replace(/<rt>[^<]*<\/rt>/g,"").replace(/<[^>]+>/g," ")}<br><b>정답: ${q.c[0]}</b><br><span class="sub">${q.e}</span></div>`).join("")}</div>`:""}
           ${pass&&nextOpen?`<button class="btn wide" id="alvNext">Lv.${Lv+1} 퀴즈로</button>`:pass&&nx?`<p class="sub" style="margin:0">Lv.${Lv+1} 퀴즈는 레벨이 오르면 열려요. 다음 레벨까지 ${xpFor(lvOf(xp)+1)-xp} XP 남았어요.</p>`:""}
           <div style="display:flex;gap:8px;width:100%"><button class="btn ghost" id="alvList" style="flex:1">레벨 목록</button><button class="btn ghost" id="alvAgain" style="flex:1">${pass?"다시 풀기":"단어 다시 보기"}</button></div></div>`;
@@ -2538,7 +2564,7 @@ function autoAnswer(q){
     if(f&&q.ref.kind==="quiz"){const it=f.ch.quiz[+k];if(it)return `정답은 ‘${textOf(it.c[0])}’예요. ${it.e} 같은 표현으로 예문을 하나 직접 만들어 보면 오래 기억에 남아요.`}}
   return "질문 고마워요. 실제 서비스에서는 배정된 선배가 질문을 읽고 직접 답변을 작성해요. 지금 보이는 답변은 데모용 자동 응답이에요.";
 }
-function tick(){
+function tick(){try{settleQs()}catch(e){}
   let changed=false,arrived=false;const now=Date.now();
   Qs.forEach(q=>{if(q.example||q.live)return;
     if(q.status==="wait"&&assign(q))changed=true;
@@ -2560,11 +2586,17 @@ function openAsk(ref,type,prefill){
     ${ref?`<div class="ref">첨부: <b>${esc(ref.label)}</b></div>`:""}
     <div class="field"><label for="askType">질문 유형</label><select id="askType">${QTYPES.map(t=>`<option${t===type?" selected":""}>${t}</option>`).join("")}</select></div>
     <div class="field"><label for="askText">질문 내용</label><textarea id="askText" maxlength="400" placeholder="예: 이 문장에서 は 대신 が를 쓰면 뜻이 어떻게 달라져요?">${prefill?esc(prefill):""}</textarea><span class="sub" id="askCount" style="text-align:right;font-variant-numeric:tabular-nums">0 / 300</span></div>
+    <label class="toggle" for="askFast"><input type="checkbox" id="askFast"> 빠른 답변 · 30분 안에 (+${Q_FAST}캐시, 늦으면 전액 환불)</label>
+    <p class="sub" id="askCost" style="margin:0"></p>
     <p class="err" id="askErr" hidden></p>
     <div style="display:flex;gap:8px"><button class="btn ghost" id="askCancel" style="flex:1">취소</button><button class="btn" id="askSend" style="flex:1">보내기</button></div>
   </div></div>`;
   const ta=$("askText"),cnt=()=>{const n=ta.value.trim().length;$("askCount").textContent=`${n} / 300`;$("askCount").style.color=n>300?"var(--bad)":""};
   ta.oninput=cnt;cnt();ta.focus();
+  const usedToday=()=>Qs.filter(q=>!q.example&&q.status!=="cancel"&&dstr(new Date(q.created))===dstr(new Date())).length;
+  const askCost=()=>(Math.max(0,Q_FREE-usedToday())>0?0:Q_PRICE)+($("askFast").checked?Q_FAST:0);
+  const drawCost=()=>{const c=askCost();$("askCost").innerHTML=`오늘 무료 질문 ${Math.max(0,Q_FREE-usedToday())}개 남음 · 이 질문 <b>${c?won(c)+"캐시":"무료"}</b> · 보유 ${won(cash)}캐시`};
+  $("askFast").onchange=drawCost;drawCost();
   $("sbg").onclick=e=>{if(e.target.id==="sbg")closeSheet()};$("askCancel").onclick=closeSheet;
   $("askSend").onclick=async()=>{
     const text=ta.value.trim(),today=dstr(new Date()),used=Qs.filter(q=>!q.example&&q.status!=="cancel"&&dstr(new Date(q.created))===today).length;
@@ -2574,17 +2606,20 @@ function openAsk(ref,type,prefill){
     else if(text.length>300)err=`300자 이내로 줄여 주세요. 지금 ${text.length}자예요.`;
     else if(used>=DAILY)err=`오늘 질문 ${DAILY}개를 모두 썼어요. 내일 다시 질문할 수 있어요.`;
     else if(Qs.some(q=>isOpen(q)&&q.text===text))err="같은 질문이 이미 답변을 기다리고 있어요. 질문함에서 확인해 보세요.";
+    const cost=askCost(),fast=$("askFast").checked;
+    if(!err&&cost>cash){$("askErr").innerHTML=`캐시가 ${won(cost-cash)} 부족해요. <button class="linkbtn" id="askCharge">충전하러 가기</button>`;$("askErr").hidden=false;$("askCharge").onclick=()=>openWallet();return}
     if(err){$("askErr").textContent=err;$("askErr").hidden=false;return}
-    const q={id:"Q"+Date.now(),created:Date.now(),type:$("askType").value,level,text,ref:ref||null,status:"wait",tutor:null,assignedAt:null,answer:null,answeredAt:null,rating:null,seen:false,sim:autoSim,reassigned:0};
+    const q={id:"Q"+Date.now(),created:Date.now(),type:$("askType").value,level,text,ref:ref||null,status:"wait",tutor:null,assignedAt:null,answer:null,answeredAt:null,rating:null,seen:false,sim:autoSim,reassigned:0,paid:cost,fast,cashv:1};
+    const pay=()=>{if(cost)cashMove("spend",-cost,`선배 질문${fast?" · 빠른 답변":""}`,{ref:q.id})};
     if(liveQA()){
       const {F,db}=acct.fb,u=acct.user,btn=$("askSend");q.id=u.uid.slice(0,10)+"-"+Date.now().toString(36);q.live=true;q.sim=false;
       btn.disabled=true;btn.textContent="보내는 중…";
-      try{await F.setDoc(F.doc(db,"questions",q.id),{uid:u.uid,name:u.displayName||(u.email||"").split("@")[0],email:u.email||"",type:q.type,level,lv:lvOf(xp),text,ref:ref?{label:ref.label||"",kind:ref.kind||""}:null,status:"wait",tutor:null,assignedAt:null,answer:null,answeredAt:null,rating:null,reassigned:0,reassignReq:null,created:q.created})}
+      try{await F.setDoc(F.doc(db,"questions",q.id),{uid:u.uid,name:u.displayName||(u.email||"").split("@")[0],email:u.email||"",type:q.type,level,lv:lvOf(xp),text,ref:ref?{label:ref.label||"",kind:ref.kind||""}:null,status:"wait",tutor:null,assignedAt:null,answer:null,answeredAt:null,rating:null,reassigned:0,reassignReq:null,paid:cost,fast,cashv:1,created:q.created})}
       catch(e){btn.disabled=false;btn.textContent="보내기";$("askErr").textContent="질문을 보내지 못했어요. 인터넷 연결을 확인하고 다시 보내 주세요.";$("askErr").hidden=false;return}
-      Qs.unshift(q);saveQs();closeSheet();toast("질문을 보냈어요. 선배가 답하면 질문함에 알려 드릴게요.");
+      Qs.unshift(q);pay();saveQs();closeSheet();toast(`질문을 보냈어요.${cost?` ${won(cost)}캐시를 썼어요.`:""} 선배가 답하면 질문함에 알려 드릴게요.`);
       if(view==="inbox")drawInbox();else if(view==="home")renderHome();return;
     }
-    Qs.unshift(q);assign(q);saveQs();closeSheet();
+    Qs.unshift(q);pay();assign(q);saveQs();closeSheet();
     toast(q.tutor?`${tutorOf(q.tutor).name}에게 질문을 보냈어요.`:"질문을 접수했어요. 운영 시간이 되면 순서대로 배정돼요.");
     if(view==="inbox")drawInbox();else if(view==="home")renderHome();
   };
@@ -2604,7 +2639,7 @@ function drawMine(){
   box.innerHTML=`<div class="stats"><div class="stat"><b>${real.length}</b><span>보낸 질문</span></div><div class="stat"><b>${answered.length?fmtDur(avg):"–"}</b><span>평균 답변 시간</span></div><div class="stat"><b>${rated.length?Math.round(good/rated.length*100)+"%":"–"}</b><span>해결률</span></div></div>
     <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><button class="btn small" id="newQ">새 질문하기</button>${liveQA()?`<span class="sub" style="display:inline-flex;align-items:center;gap:6px"><span class="dot on"></span>실시간 운영 · 선배가 직접 답해요</span>`:`<label class="toggle" for="sim"><input type="checkbox" id="sim"${autoSim?" checked":""}>데모 자동 답변 (20초 뒤)</label>`}</div>
     ${Qs.filter(q=>q.status!=="cancel"||Date.now()-q.created<DAY).map(q=>{const st=statusOf(q),t=q.tutor&&tutorOf(q.tutor);return `<div class="qitem" data-id="${q.id}">
-      <div class="qhead"><span class="status ${st.cls}">${st.label}</span><span>${q.type}</span><span>${fmtTime(q.created)}</span>${q.example?"<span>예시</span>":""}</div>
+      <div class="qhead"><span class="status ${st.cls}">${st.label}</span>${q.fast?`<span class="status st-fast">빠른 답변</span>`:""}<span>${q.type}</span><span>${fmtTime(q.created)}</span>${q.paid?`<span>${won(q.paid)}캐시${q.refunded?" · 환불됨":""}</span>`:""}${q.settled?"<span>지연 보상 지급됨</span>":""}${q.example?"<span>예시</span>":""}</div>
       ${qRef(q)}<p class="qtext2">${esc(q.text)}</p>
       ${t&&q.status!=="cancel"?`<span class="sub">담당: ${t.name} · ${t.tag}${q.reassigned?` · 재배정 ${q.reassigned}회`:""}</span>`:q.status==="wait"?`<span class="sub">${q.live?"선배 배정을 기다리고 있어요. 운영 시간(09~24시)에는 보통 2시간 안에 답이 와요.":"운영 시간(09~24시) 외 접수. 오전 9시 이후 순서대로 배정돼요."}</span>`:""}
       ${q.status==="done"?`<div class="answer"><b>${t?t.name:"튜터"}의 답변${q.auto?" · 데모 자동 답변":""} · ${fmtDur(q.answeredAt-q.created)} 만에 도착</b><span>${esc(q.answer)}</span></div>
@@ -2617,7 +2652,7 @@ function drawMine(){
   box.onclick=e=>{const b=e.target.closest("[data-act]");if(!b)return;const q=Qs.find(x=>x.id===b.closest(".qitem").dataset.id);if(!q)return;const a=b.dataset.act;
     if(a==="good"){q.rating="good";qaUpdate(q,{rating:"good"});toast("평가를 남겼어요. 고마워요!")}
     if(a==="bad"){q.rating="bad";qaUpdate(q,{rating:"bad"});saveQs();openAsk(q.ref,q.type,"(추가 질문) ");return}
-    if(a==="cancel"){q.status="cancel";qaUpdate(q,{status:"cancel"});toast("질문을 취소했어요.")}
+    if(a==="cancel"){q.status="cancel";qaUpdate(q,{status:"cancel"});toast(q.paid?`질문을 취소하고 ${won(q.paid)}캐시를 돌려드렸어요.`:"질문을 취소했어요.");settleQs()}
     if(a==="reassign"&&q.live){q.reassignReq=Date.now();qaUpdate(q,{reassignReq:q.reassignReq});toast("운영진에게 재배정을 요청했어요.");saveQs();drawInbox();return}
     if(a==="reassign"){const prev=q.tutor;if(assign(q,prev,true)){q.reassigned=(q.reassigned||0)+1;toast(`${tutorOf(q.tutor).name}에게 다시 배정했어요.`)}}
     saveQs();drawInbox()};
@@ -2638,6 +2673,118 @@ function drawTutor(){
       if(v.length<10){er.textContent="답변을 10자 이상 적어 주세요.";er.hidden=false;return}
       if(!q.tutor)q.tutor=TUTORS[0].id;q.answer=v;q.answeredAt=Date.now();q.status="done";q.seen=false;q.auto=false;saveQs();toast("답변을 보냈어요. 학생의 질문함에 표시돼요.");drawInbox()}
     if(b.dataset.act==="reassign"){if(assign(q,q.tutor,true)){q.reassigned=(q.reassigned||0)+1;saveQs();toast(`${tutorOf(q.tutor).name}에게 넘겼어요.`);drawInbox()}}
+  };
+}
+
+/* ---------- 캐시: 모의 결제 · 적립 · 보상 (실제 결제 아님) ---------- */
+const PACKS=[{id:"p1",won:1000,cash:1000},{id:"p5",won:5000,cash:5500,tag:"10% 더"},{id:"p10",won:10000,cash:12000,tag:"20% 더"}];
+const EARN={goal:10,streak7:50,stage:100,welcome:100},Q_FREE=2,Q_PRICE=200,Q_FAST=300,FAST_SLA=30*60e3,LATE_COMP=50,FAST_COMP=100;
+const TXL={charge:"충전",earn:"적립",spend:"사용",refund:"환불",comp:"보상",fail:"결제 실패"};
+const COIN='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2h3.6a1.9 1.9 0 0 1 0 3.8H10m0 0h3.4a1.9 1.9 0 0 1 0 3.8H9.5M10 7.5v9.8"/></svg>';
+let cash=store.get("cash",0),cashLog=store.get("cashLog",[]);
+const won=n=>n.toLocaleString("ko-KR");
+function cashMove(type,amt,memo,extra){
+  if(amt<0&&cash+amt<0)return null;
+  cash+=amt;const e=Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:Date.now(),type,amt,bal:cash,memo},extra||{});
+  cashLog.unshift(e);if(cashLog.length>200)cashLog.length=200;store.set("cash",cash);store.set("cashLog",cashLog);drawCash();
+  if(liveQA()){const {F,db}=acct.fb,u=acct.user;
+    F.setDoc(F.doc(db,"tx",u.uid.slice(0,10)+"-"+e.id),{uid:u.uid,email:u.email||"",name:u.displayName||(u.email||"").split("@")[0],type,amt,bal:cash,memo,won:e.won||0,method:e.method||"",ref:e.ref||"",at:e.t}).catch(()=>{})}
+  return e;
+}
+function drawCash(){const b=$("cashBtn");if(b){b.innerHTML=`${COIN}<span class="num">${won(cash)}</span>`;b.setAttribute("aria-label",`내 캐시 ${won(cash)}`)}if($("wlBal"))$("wlBal").textContent=won(cash)}
+function earnOnce(key,amt,memo){const k="earned_"+key;if(store.get(k,false))return;store.set(k,true);cashMove("earn",amt,memo);setTimeout(()=>toast(`${memo} · ${amt}캐시 적립`),900)}
+
+/* wallet sheet */
+function openWallet(step,pack){
+  const P=PACKS.find(p=>p.id===pack);
+  const head=`<div class="ac-top"><h3 id="wlT">${step==="pay"?"모의 결제":"내 캐시"}</h3><button class="ac-x" id="wlX" aria-label="닫기">✕</button></div>`;
+  let body;
+  if(step==="pay"&&P){
+    body=`<div class="acstat"><span class="label">충전할 캐시</span><b>${won(P.cash)} 캐시</b><span class="sub">결제 금액 ${won(P.won)}원</span></div>
+      <fieldset class="paym"><legend class="label">결제 수단</legend>
+        <label><input type="radio" name="pm" value="모의 카드" checked> 모의 카드</label>
+        <label><input type="radio" name="pm" value="모의 간편결제"> 모의 간편결제</label></fieldset>
+      <label class="toggle" for="pmFail"><input type="checkbox" id="pmFail"> 결제 실패 상황으로 시험하기</label>
+      <p class="acwarn" style="margin:0">과제용 모의 결제라 실제로 돈이 나가지 않고 카드 정보도 받지 않아요.</p>
+      <p class="err" id="pmErr" hidden></p>
+      <div style="display:flex;gap:8px"><button class="btn ghost" id="pmBack" style="flex:1">뒤로</button><button class="btn" id="pmGo" style="flex:2">${won(P.won)}원 결제하기</button></div>`;
+  }else{
+    body=`<div class="acstat"><span class="label">보유 캐시</span><b class="num" style="font-size:24px"><span id="wlBal">${won(cash)}</span> 캐시</b><span class="sub">선배 질문에 쓸 수 있어요. 과제용 모의 결제라 실제 돈은 오가지 않아요.</span></div>
+      <div><span class="label">충전하기</span><div class="packs">${PACKS.map(p=>`<button class="pack" data-pack="${p.id}"><b class="num">${won(p.cash)}</b><span>${won(p.won)}원</span>${p.tag?`<i>${p.tag}</i>`:""}</button>`).join("")}</div></div>
+      <details class="wlinfo"><summary>캐시 모으고 쓰는 법</summary>
+        <ul><li>하루 목표 달성 +${EARN.goal} · 연속 7일 학습마다 +${EARN.streak7} · 새 단계 진입 +${EARN.stage} · 첫 로그인 +${EARN.welcome}</li>
+        <li>선배 질문: 하루 ${Q_FREE}개 무료, 그다음부터 ${Q_PRICE}캐시 · 빠른 답변(30분 안) +${Q_FAST}캐시</li>
+        <li>답변 전 취소하면 쓴 캐시를 모두 돌려드려요. 빠른 답변이 30분을 넘기면 전액 환불 + ${FAST_COMP}캐시, 일반 질문이 2시간을 넘기면 ${LATE_COMP}캐시를 보상해요.</li>
+        <li>앱 오류·결제 오류는 신고해 주시면 운영진이 확인 후 캐시로 보상해요.</li></ul></details>
+      <div><div class="ac-top"><span class="label">내역</span><button class="linkbtn" id="wlHelp" style="font-weight:500;font-size:13px">오류 신고하고 보상 받기</button></div>
+        ${cashLog.length?`<ul class="txl">${cashLog.slice(0,15).map(e=>`<li><span><b>${TXL[e.type]||e.type}</b> ${esc(e.memo||"")}<small>${fmtTime(e.t)}</small></span><span class="num ${e.amt>0?"pos":e.amt<0?"neg":""}">${e.amt>0?"+":""}${won(e.amt)}</span></li>`).join("")}</ul>`:`<p class="sub" style="margin:6px 0 0">아직 내역이 없어요. 오늘 목표를 채우면 첫 캐시가 쌓여요.</p>`}</div>`;
+  }
+  $("sheetRoot").innerHTML=`<div class="sheet-bg" id="sbg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="wlT">${head}${body}</div></div>`;
+  $("sbg").onclick=e=>{if(e.target.id==="sbg")closeSheet()};$("wlX").onclick=closeSheet;
+  document.querySelectorAll("[data-pack]").forEach(b=>b.onclick=()=>openWallet("pay",b.dataset.pack));
+  if($("wlHelp"))$("wlHelp").onclick=()=>openSupport("error");
+  if($("pmBack"))$("pmBack").onclick=()=>openWallet();
+  if($("pmGo"))$("pmGo").onclick=()=>{
+    const btn=$("pmGo"),m=(document.querySelector("input[name=pm]:checked")||{}).value||"모의 카드",fail=$("pmFail").checked,order="BN"+Date.now().toString().slice(-8);
+    btn.disabled=true;btn.innerHTML=`<span class="spin" aria-hidden="true" style="display:inline-block;vertical-align:-4px;margin-right:6px"></span>승인 중…`;
+    setTimeout(()=>{
+      if(fail){cashMove("fail",0,`${won(P.won)}원 결제 실패 (${m})`,{won:P.won,method:m,ref:order});btn.disabled=false;btn.textContent=`${won(P.won)}원 다시 결제하기`;
+        $("pmErr").textContent="결제가 승인되지 않았어요. 돈은 나가지 않았고 캐시도 그대로예요. 다시 시도해 주세요.";$("pmErr").hidden=false;return}
+      cashMove("charge",P.cash,`${won(P.won)}원 충전 (${m})`,{won:P.won,method:m,ref:order});closeSheet();toast(`${won(P.cash)}캐시를 충전했어요. 주문번호 ${order}`);
+    },1100);
+  };
+}
+
+/* refunds and late-answer compensation run on this device, so they work even before the console sees them */
+function settleQs(){
+  let ch=false;
+  Qs.forEach(q=>{if(q.example||q.settled||!q.cashv)return;
+    const sla=q.fast?(q.live?FAST_SLA:SLA/2):(q.live?LIVE_SLA:SLA),end=q.status==="done"?q.answeredAt:q.status==="cancel"?null:Date.now();
+    if(q.status==="cancel"){if(q.paid&&!q.refunded){q.refunded=true;cashMove("refund",q.paid,"질문 취소 환불",{ref:q.id});qaUpdate(q,{refunded:true});ch=true}return}
+    if(end&&end-q.created>sla){
+      q.settled=true;ch=true;
+      if(q.fast){cashMove("refund",q.paid||0,"빠른 답변 지연 환불",{ref:q.id});cashMove("comp",FAST_COMP,"빠른 답변 지연 보상",{ref:q.id});toast(`빠른 답변이 늦어 ${won((q.paid||0)+FAST_COMP)}캐시를 돌려드렸어요.`)}
+      else{cashMove("comp",LATE_COMP,"답변 지연 보상",{ref:q.id});toast(`답변이 2시간을 넘겨 ${LATE_COMP}캐시를 보상했어요.`)}
+      qaUpdate(q,{compensated:true});
+    }
+  });
+  if(ch)saveQs();
+}
+/* compensation the console grants (comp collection) */
+function compSubscribe(){
+  if(acct.compUnsub||!liveQA())return;const {F,db}=acct.fb,uid=acct.user.uid;
+  try{acct.compUnsub=F.onSnapshot(F.query(F.collection(db,"comp"),F.where("uid","==",uid)),s=>{
+    s.docs.forEach(d=>{const r=d.data()||{};if(r.claimed)return;
+      F.updateDoc(F.doc(db,"comp",d.id),{claimed:true,claimedAt:Date.now()}).then(()=>{
+        cashMove(r.kind==="refund"?"refund":"comp",r.amt||0,`${r.kind==="refund"?"운영진 환불":"운영진 보상"}${r.reason?" · "+r.reason:""}`,{ref:d.id});
+        toast(`운영진이 ${won(r.amt||0)}캐시를 지급했어요${r.reason?" ("+r.reason+")":""}.`)}).catch(()=>{})});
+  },()=>{acct.compUnsub=null})}catch(e){}
+}
+
+/* account recovery + error reports go to the console's support queue */
+function openSupport(kind){
+  const u=acct.user,types=["계정 찾기","비밀번호 문제","앱·문제 오류","결제 오류","기타"],def=kind==="account"?"계정 찾기":"앱·문제 오류";
+  $("sheetRoot").innerHTML=`<div class="sheet-bg" id="sbg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="spT">
+    <div class="ac-top"><h3 id="spT">${kind==="account"?"가입한 계정 찾기":"운영진에게 알리기"}</h3><button class="ac-x" id="spX" aria-label="닫기">✕</button></div>
+    ${kind==="account"?`<ol class="sub" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Google로 가입했다면 로그인 화면에서 ‘Google 계정으로 계속하기’를 눌러 보세요.</li><li>이메일로 가입했다면 자주 쓰는 이메일을 넣고 ‘비밀번호를 잊었어요’를 눌러 보세요. 가입된 주소면 재설정 메일이 가요.</li><li>그래도 모르겠으면 아래에 남겨 주세요. 운영진이 24시간 안에 연락받을 이메일로 답해요.</li></ol>`
+      :`<p class="sub" style="margin:0">문제 오류, 앱 오류, 결제 오류를 알려 주세요. 운영진이 확인하면 캐시로 보상해요(보통 50~300캐시).</p>`}
+    <div class="field"><label for="spType">유형</label><select id="spType">${types.map(t=>`<option${t===def?" selected":""}>${t}</option>`).join("")}</select></div>
+    <div class="field"><label for="spEm">연락받을 이메일</label><input type="email" id="spEm" autocomplete="email" value="${esc(u&&u.email||"")}" placeholder="you@example.com"></div>
+    <div class="field"><label for="spTx">내용</label><textarea id="spTx" maxlength="500" placeholder="${kind==="account"?"예: 닉네임 하윤, 10월쯤 가입, 레벨 30 정도였어요.":"예: N3 문법 퀴즈 5번 정답이 두 개인 것 같아요."}"></textarea></div>
+    <p class="err" id="spErr" hidden></p>
+    <div style="display:flex;gap:8px"><button class="btn ghost" id="spNo" style="flex:1">취소</button><button class="btn" id="spGo" style="flex:1">보내기</button></div></div></div>`;
+  $("sbg").onclick=e=>{if(e.target.id==="sbg")closeSheet()};$("spX").onclick=$("spNo").onclick=closeSheet;
+  $("spGo").onclick=async()=>{
+    const em=$("spEm").value.trim(),tx=$("spTx").value.trim(),type=$("spType").value,er=$("spErr"),fail=m=>{er.textContent=m;er.hidden=false};
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return fail("답을 받을 이메일 주소를 확인해 주세요.");
+    if(tx.length<5)return fail("내용을 5자 이상 적어 주세요.");
+    const doc={type,email:em,text:tx,uid:u?u.uid:null,name:u?(u.displayName||""):"",lv:lvOf(xp),status:"open",created:Date.now()};
+    const btn=$("spGo");btn.disabled=true;btn.textContent="보내는 중…";
+    try{
+      if(acct.on){const fb=acct.fb||await fbLoad();await fb.F.setDoc(fb.F.doc(fb.db,"support",Date.now().toString(36)+Math.random().toString(36).slice(2,7)),doc)}
+      else{const L=store.get("supportLocal",[]);L.unshift(doc);store.set("supportLocal",L)}
+      closeSheet();toast(acct.on?"접수했어요. 운영진이 24시간 안에 이메일로 답해요.":"접수했어요. (데모 화면이라 이 기기에만 저장돼요)");
+    }catch(e){btn.disabled=false;btn.textContent="보내기";fail("보내지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.")}
   };
 }
 
@@ -2706,7 +2853,7 @@ function qaSubscribe(){
 function mergeLive(docs){
   let changed=false,arrived=0;
   docs.forEach(d=>{const r=d.data()||{};let q=Qs.find(x=>x.id===d.id);
-    if(!q){q={id:d.id,created:r.created||Date.now(),type:r.type||"기타",level:r.level||level,text:r.text||"",ref:r.ref||null,live:true,sim:false,seen:r.status==="done",reassigned:0};Qs.push(q);changed=true}
+    if(!q){q={id:d.id,created:r.created||Date.now(),type:r.type||"기타",level:r.level||level,text:r.text||"",ref:r.ref||null,live:true,sim:false,seen:r.status==="done",reassigned:0,paid:r.paid||0,fast:!!r.fast,cashv:r.cashv||0,settled:!!r.compensated,refunded:!!r.refunded};Qs.push(q);changed=true}
     const was=q.status;
     ["status","tutor","assignedAt","answer","answeredAt","rating","reassigned","reassignReq","cancelReason"].forEach(k=>{if(r[k]!==undefined&&JSON.stringify(q[k])!==JSON.stringify(r[k])){q[k]=r[k];changed=true}});
     if(q.status==="done"&&was&&was!=="done"){q.seen=false;q.auto=false;arrived++}
@@ -2739,7 +2886,7 @@ async function acctSync(){
       }else if(!owner&&localHas){acct.merge={cloud,lx};drawAcct();openAcct();return}
       else return acctApply(cloud,u.uid);
     }
-    ameta.set("owner",u.uid);acct.synced=true;qaSubscribe();
+    ameta.set("owner",u.uid);acct.synced=true;qaSubscribe();compSubscribe();earnOnce("welcome",EARN.welcome,"첫 로그인 보너스");
     if(dirty||!cloud||!cloud.data)await acctPush(true);
   }catch(e){acct.busy=false;acct.err=fsMsg(e)}
   drawAcct();
@@ -2805,7 +2952,7 @@ async function acctLogout(){
 function acctChoose(which){
   const m=acct.merge,u=acct.user;if(!m||!u)return;acct.merge=null;
   if(which==="cloud")return acctApply(m.cloud,u.uid);
-  ameta.set("owner",u.uid);acct.synced=true;qaSubscribe();acctPush(true);closeSheet();toast("이 기기 기록을 계정에 저장했어요.");
+  ameta.set("owner",u.uid);acct.synced=true;qaSubscribe();compSubscribe();acctPush(true);closeSheet();toast("이 기기 기록을 계정에 저장했어요.");
 }
 
 /* header button + sheet */
@@ -2846,7 +2993,7 @@ function fillAcct(){
       <div class="field"><label for="acPw">비밀번호 <span class="sub" style="font-weight:500">6자 이상</span></label><input type="password" id="acPw" autocomplete="current-password" value="${esc(keepPw)}"${dis}></div>
       ${msgs}
       <div style="display:flex;gap:8px"><button class="btn" id="acIn" style="flex:1"${dis}>${acct.busy?"확인 중…":"로그인"}</button><button class="btn ghost" id="acUp" style="flex:1"${dis}>회원가입</button></div>
-      <button class="linkbtn" id="acRs" style="align-self:flex-start;font-weight:500;color:var(--muted)"${dis}>비밀번호를 잊었어요</button>
+      <div style="display:flex;gap:14px;flex-wrap:wrap"><button class="linkbtn" id="acRs" style="font-weight:500;color:var(--muted)"${dis}>비밀번호를 잊었어요</button><button class="linkbtn" id="acFind" style="font-weight:500;color:var(--muted)">가입한 이메일을 잊었어요</button></div>
       <p class="note" style="text-align:left">로그인하지 않아도 이 브라우저에는 기록이 남아요. 처음 로그인하면 지금까지의 기록이 계정으로 옮겨져요.</p>`;
   }else if(acct.merge){
     const c=acct.merge.cloud;
@@ -2866,13 +3013,14 @@ function fillAcct(){
   el.innerHTML=h;
   const on=(id,f)=>{const b=$(id);if(b)b.onclick=f};
   on("acX",closeSheet);on("acRetry",()=>{acct.fb=null;acctInit()});on("acG",acctGoogle);
-  on("acIn",()=>acctEmail("login"));on("acUp",()=>acctEmail("signup"));on("acRs",()=>acctEmail("reset"));
+  on("acIn",()=>acctEmail("login"));on("acFind",()=>openSupport("account"));on("acUp",()=>acctEmail("signup"));on("acRs",()=>acctEmail("reset"));
   on("acCloud",()=>acctChoose("cloud"));on("acLocal",()=>acctChoose("local"));
   on("acSave",async()=>{acct.msg="";await acctPush(true);if(!acct.err){acct.msg="계정에 저장했어요.";fillAcct()}});on("acOut",acctLogout);
   if($("acPw"))$("acPw").onkeydown=e=>{if(e.key==="Enter")acctEmail("login")};
 }
 $("acctBtn").onclick=()=>{acct.msg="";openAcct()};
 $("redoBtn").onclick=replayTutorial;
+drawCash();$("cashBtn").onclick=()=>openWallet();
 try{const t=sessionStorage.getItem(ACCT_PFX+"toast");if(t){sessionStorage.removeItem(ACCT_PFX+"toast");setTimeout(()=>toast(t),400)}}catch(e){}
 
 if(store.get("onboarded",false)){$("home").hidden=false;renderHome()}else showOnboard("goal");
