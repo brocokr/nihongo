@@ -7,6 +7,12 @@
 <meta name="description" content="broco Nihongo · 한자를 처음부터 함께 배우는 레벨형 일본어 학습 앱">
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%2228%22%20y%3D%2234%22%20width%3D%228%22%20height%3D%2224%22%20rx%3D%224%22%20fill%3D%22%235d8a3a%22/%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2228%22%20r%3D%2213%22%20fill%3D%22%232e7d32%22/%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2228%22%20r%3D%2213%22%20fill%3D%22%232e7d32%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2218%22%20r%3D%2214%22%20fill%3D%22%2343a047%22/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="broco Nihongo">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>broco Nihongo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=Zen+Maru+Gothic:wght@500;700&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -42,6 +48,30 @@ h1{margin:0;font-family:var(--f-jp);font-size:25px;font-weight:700}
 h1 span{color:var(--accent)}
 [hidden]{display:none!important}
 .tb-r{display:flex;align-items:center;gap:6px}
+.tb-l{display:flex;align-items:center;gap:6px;min-width:0}
+.topbar.hometop{gap:8px;flex-wrap:wrap;row-gap:6px}.hometop .tb-r{margin-left:auto}
+.redo .ls{display:none}
+@media (max-width:430px){.topbar.hometop{gap:6px}.hometop .tb-l,.hometop .tb-r{gap:4px}#redoBtn svg{display:none}}
+@media (max-width:400px){.redo .lf{display:none}.redo .ls{display:inline}.hometop .redo{padding:4px 8px;font-size:11px}.hometop .redo.inst svg{display:block}}
+@media (max-width:350px){.hometop .redo.inst .lf2{display:none}.hometop .redo.inst{padding:0;width:28px;justify-content:center}}
+.redo.inst{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+#pwaCard:empty{display:none}
+.pwcard{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 6px 6px 8px}
+.pwmain{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer;padding:2px}
+.pwmain svg{flex:none;border-radius:8px}
+.pwmain>span:not(.pwgo){flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.35}
+.pwmain b{font-size:14px}
+.pwgo{flex:none;font-size:12px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.pwhead{display:flex;align-items:center;gap:14px}
+.pwhead svg{flex:none;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.pwhead>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pwhead b{font-size:17px}
+.pwtabs{display:flex;flex-wrap:wrap;gap:6px}
+.pwtabs button{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;border-radius:999px;padding:7px 12px;cursor:pointer}
+.pwtabs button[aria-selected="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.pwsteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;counter-reset:s}
+.pwsteps li{counter-increment:s;display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:700;font-size:14.5px}
+.pwsteps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;font-size:13px}
 .acctbtn,.cashbtn{white-space:nowrap}
 @media (max-width:380px){.redo{padding:4px 8px;font-size:11px}.redo svg{display:none}.cashbtn{padding:4px 8px}}
 .cashbtn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface);color:var(--sun);border-radius:999px;padding:4px 10px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;min-height:32px}
@@ -557,7 +587,7 @@ body.pron-off .rom,body.pron-off .han,body.pron-rom .han,body.pron-han .rom:not(
 .romtg[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
-<style>html,body{margin:0}</style>
+<style>html,body{margin:0}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}</style>
 </head>
 <body>
 
@@ -565,12 +595,13 @@ body.pron-off .rom,body.pron-off .han,body.pron-rom .han,body.pron-han .rom:not(
   <section id="onboard" hidden><div id="obBody" class="stack"></div></section>
 
   <section id="home" hidden>
-    <div class="topbar"><button class="redo" id="redoBtn" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>배치 경기 다시 하기</button><div class="tb-r"><button class="cashbtn" id="cashBtn" type="button" aria-label="내 캐시"></button><button class="acctbtn" id="acctBtn" type="button" data-s="off"></button></div></div>
+    <div class="topbar hometop"><div class="tb-l"><button class="redo" id="redoBtn" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="lf">배치 경기 다시 하기</span><span class="ls">배치 다시</span></button><button class="redo inst" id="pwaBtn" type="button" title="홈 화면에 앱으로 설치" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span class="lf2">앱 설치</span></button></div><div class="tb-r"><button class="cashbtn" id="cashBtn" type="button" aria-label="내 캐시"></button><button class="acctbtn" id="acctBtn" type="button" data-s="off"></button></div></div>
     <header>
       <h1>broco <span>Nihongo</span></h1>
       <span class="pill" id="streak">오늘 첫 학습 전</span>
     </header>
     <div id="qaBanner" class="qabwrap"></div>
+    <div id="pwaCard"></div>
     <div class="tracks" id="tracks"></div>
     <div id="goalCard"></div>
     <div id="lvCard"></div>
@@ -586,7 +617,6 @@ body.pron-off .rom,body.pron-off .han,body.pron-rom .han,body.pron-han .rom:not(
         <div class="seg" id="romSeg"><button data-r="rom">로마자</button><button data-r="han">한글</button><button data-r="off">끄기</button></div>
       </div>
     </div>
-    <p class="note">학습 기록과 질문은 이 기기의 브라우저에만 저장돼요. 튜터와 답변은 시연용 더미 데이터예요.</p>
     <button class="linkbtn" id="homeTut" style="align-self:center;color:var(--muted);font-weight:500">등급 배치 경기 다시 하기</button>
   </section>
 
@@ -1843,7 +1873,7 @@ let obReplay=false;
 function replayTutorial(){obReplay=true;showOnboard("goal")}
 function drawReset(){
   /* retake lives in the home header (#redoBtn); only the destructive full reset stays at the bottom of the menu */
-  $("resetBox").innerHTML=`<button class="linkbtn" id="rsBtn" style="color:var(--muted);font-weight:500">처음부터 다시 시작 (고객 테스트용 초기화)</button>`;
+  $("resetBox").innerHTML=`<button class="linkbtn" id="pwMenu" style="font-weight:500">홈 화면에 추가해서 앱처럼 쓰기</button><button class="linkbtn" id="rsBtn" style="color:var(--muted);font-weight:500">처음부터 다시 시작 (고객 테스트용 초기화)</button>`;$("pwMenu").onclick=openInstall;
   $("rsBtn").onclick=()=>{$("resetBox").innerHTML=`<div class="box stack" style="gap:10px;width:100%"><p style="margin:0;font-size:14px">학습 기록, 오답 노트, 질문이 모두 지워지고 목적 선택과 등급 배치 경기부터 다시 시작해요.${acct.user&&acct.synced?" 계정에 저장된 기록도 함께 초기화돼요.":""}</p><div style="display:flex;gap:8px"><button class="btn ghost small" id="rsNo" style="flex:1">취소</button><button class="btn small danger" id="rsYes" style="flex:1">모두 지우고 다시 시작</button></div></div>`;
     $("rsNo").onclick=drawReset;$("rsYes").onclick=resetAll};
 }
@@ -2851,6 +2881,54 @@ function openSupport(kind){
   };
 }
 
+/* ---------- 앱처럼 쓰기: 홈 화면에 추가 (PWA) ---------- */
+let installEvt=null;
+const isStandalone=()=>{try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}};
+const onWeb=()=>location.protocol==="https:"&&!/claude/i.test(location.hostname);
+const pwaPlatform=()=>{const u=navigator.userAgent||"";return /SamsungBrowser/i.test(u)?"samsung":(/iPhone|iPad|iPod/i.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1))?"ios":/Android/i.test(u)?"android":"pc"};
+const PWA_STEPS={
+  android:{name:"안드로이드 (크롬)",steps:["오른쪽 위 ⋮ 메뉴를 눌러요","‘앱 설치’ 또는 ‘홈 화면에 추가’를 눌러요","‘설치’(또는 ‘추가’)를 눌러요"]},
+  samsung:{name:"갤럭시 (삼성 인터넷)",steps:["아래쪽 ≡ 메뉴를 눌러요","‘현재 페이지 추가’를 누르고 ‘홈 화면’을 골라요","‘추가’를 눌러요"]},
+  ios:{name:"아이폰 / 아이패드",steps:["Safari로 열고 공유 버튼(네모에 위쪽 화살표)을 눌러요","목록을 내려 ‘홈 화면에 추가’를 눌러요","오른쪽 위 ‘추가’를 눌러요"]},
+  pc:{name:"PC (크롬 / 엣지)",steps:["주소창 오른쪽 끝의 설치 아이콘을 눌러요","안 보이면 ⋮(엣지는 …) 메뉴 → ‘앱’ 또는 ‘전송, 저장 및 공유’ → ‘앱으로 설치’를 눌러요","‘설치’를 눌러요"]}};
+const APP_IC='<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#2e7d32"/><rect x="28" y="32" width="8" height="18" rx="4" fill="#d6ecc8"/><circle cx="18" cy="28" r="9" fill="#bbe2aa"/><circle cx="46" cy="28" r="9" fill="#bbe2aa"/><circle cx="32" cy="20" r="11" fill="#f3f9ec"/><circle cx="24" cy="21" r="7" fill="#f3f9ec"/><circle cx="40" cy="21" r="7" fill="#f3f9ec"/><circle cx="32" cy="29" r="8" fill="#f3f9ec"/></svg>';
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e;if($("pwaSheet"))fillInstall();drawPwaCard();drawPwaBtn()});
+addEventListener("appinstalled",()=>{installEvt=null;store.set("pwaHide",true);drawPwaCard();drawPwaBtn();if($("pwaSheet"))closeSheet();toast("홈 화면에 추가했어요. 이제 아이콘으로 바로 열 수 있어요.")});
+function drawPwaBtn(){const b=$("pwaBtn");if(b)b.hidden=isStandalone()}
+async function pwaQuick(){
+  const ev=installEvt;if(!ev){openInstall();return}
+  installEvt=null;ev.prompt();
+  try{const r=await ev.userChoice;if(r&&r.outcome!=="accepted")toast("설치를 취소했어요. 언제든 다시 할 수 있어요.")}catch(e){}
+  drawPwaCard();
+}
+let pwaTab=null;
+function openInstall(){
+  pwaTab=pwaTab||pwaPlatform();
+  $("sheetRoot").innerHTML=`<div class="sheet-bg" id="sbg"><div class="sheet" id="pwaSheet" role="dialog" aria-modal="true" aria-labelledby="pwT"></div></div>`;
+  $("sbg").onclick=e=>{if(e.target.id==="sbg")closeSheet()};fillInstall();
+}
+function fillInstall(){
+  const el=$("pwaSheet");if(!el)return;const P=PWA_STEPS[pwaTab];
+  el.innerHTML=`<div class="ac-top"><h3 id="pwT">홈 화면에 추가해서 앱처럼 쓰기</h3><button class="ac-x" id="pwX" aria-label="닫기">✕</button></div>
+    <div class="pwhead">${APP_IC}<div><b>broco Nihongo</b><span class="sub">아이콘을 누르면 주소창 없이 전체 화면으로 열려요. 지하철에서도 바로 이어서 공부할 수 있어요.</span></div></div>
+    ${isStandalone()?`<p class="acok" style="margin:0">지금 앱으로 열려 있어요. 이미 설치됐어요.</p>`:installEvt?`<button class="btn wide" id="pwGo">지금 설치하기</button>`:""}
+    ${!isStandalone()&&!installEvt&&!onWeb()?`<p class="acwarn" style="margin:0">여기서는 설치가 안 돼요. 휴대폰 브라우저에서 <b>brocokr.github.io/nihongo</b>를 열고 아래 순서대로 해 주세요.</p>`:""}
+    ${IN_APP?`<p class="acwarn" style="margin:0">카카오톡·인스타그램 안에서는 설치할 수 없어요. 오른쪽 위 메뉴에서 ‘다른 브라우저로 열기’를 먼저 눌러 주세요.</p>`:""}
+    <div class="pwtabs" role="tablist">${Object.keys(PWA_STEPS).map(k=>`<button role="tab" aria-selected="${k===pwaTab}" data-pw="${k}">${PWA_STEPS[k].name}</button>`).join("")}</div>
+    <ol class="pwsteps">${P.steps.map(s=>`<li>${s}</li>`).join("")}</ol>
+    <p class="sub" style="margin:0">아이콘을 지우고 싶으면 다른 앱처럼 길게 눌러서 삭제하면 돼요. 학습 기록은 로그인한 계정에 그대로 남아요.</p>`;
+  $("pwX").onclick=closeSheet;
+  el.querySelectorAll("[data-pw]").forEach(b=>b.onclick=()=>{pwaTab=b.dataset.pw;fillInstall()});
+  if($("pwGo"))$("pwGo").onclick=async()=>{const ev=installEvt;if(!ev)return;installEvt=null;ev.prompt();try{const r=await ev.userChoice;if(r&&r.outcome!=="accepted")toast("설치를 취소했어요. 언제든 다시 할 수 있어요.")}catch(e){}fillInstall()};
+}
+function drawPwaCard(){
+  const el=$("pwaCard");if(!el)return;
+  if(isStandalone()||store.get("pwaHide",false)||!(onWeb()||installEvt)){el.innerHTML="";return}
+  el.innerHTML=`<div class="pwcard"><button class="pwmain" id="pwOpen">${APP_IC.replace('width="64" height="64"','width="34" height="34"')}<span><b>앱처럼 쓰기</b><span class="sub">홈 화면에 추가하면 아이콘으로 바로 열려요</span></span><span class="pwgo">${installEvt?"설치":"방법 보기"}</span></button><button class="qab-x" id="pwHide" aria-label="닫기">✕</button></div>`;
+  $("pwOpen").onclick=openInstall;$("pwHide").onclick=()=>{store.set("pwaHide",true);drawPwaCard();toast("맨 위 ‘앱 설치’ 버튼으로 언제든 다시 볼 수 있어요.")};
+}
+{const _rh=renderHome;renderHome=function(){_rh.apply(this,arguments);drawPwaCard()}}
+
 /* ---------- account: Firebase login + cloud save (UI) ---------- */
 const AUTH_ERR={
   "auth/invalid-email":"이메일 주소 형식을 확인해 주세요.",
@@ -3091,11 +3169,13 @@ function fillAcct(){
 }
 $("acctBtn").onclick=()=>{acct.msg="";openAcct()};
 $("redoBtn").onclick=replayTutorial;
+drawPwaBtn();$("pwaBtn").onclick=pwaQuick;
 drawCash();$("cashBtn").onclick=()=>openWallet();
 try{const t=sessionStorage.getItem(ACCT_PFX+"toast");if(t){sessionStorage.removeItem(ACCT_PFX+"toast");setTimeout(()=>toast(t),400)}}catch(e){}
 
 if(store.get("onboarded",false)){$("home").hidden=false;renderHome()}else showOnboard("goal");
 acctInit();
 </script>
+<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>
 </body>
 </html>
