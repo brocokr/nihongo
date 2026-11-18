@@ -609,7 +609,7 @@ body.pron-off .rom,body.pron-off .han,body.pron-rom .han,body.pron-han .rom:not(
     <div id="lvCard"></div>
     <div id="startCard"></div>
     <div id="trackCard"></div>
-    <div id="songCard"></div>
+    <div id="songCard"></div><div id="ryokuCard"></div>
     <div class="fgbox">
       <div class="row"><b style="font-size:14px">후리가나</b>
         <div class="seg" id="fgSeg"><button data-f="auto">단계 기준</button><button data-f="show">모두 보기</button><button data-f="hide">모두 숨김</button></div>
@@ -1627,8 +1627,8 @@ function speak(t){
   }catch(e){toast("음성 재생 중 문제가 생겼어요. 링크를 휴대폰 브라우저에서 열어 보세요.")}
 }
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-function findCh(id){if(id==="myspot"){const c=spotCh();return c?{ch:c,lv:"mid"}:null}for(const lv in CH){const ch=CH[lv].find(c=>c.id===id);if(ch)return {ch,lv}}const al=ALV.find(x=>x.id===id);if(al)return {ch:al,lv:al.tier};const st=SETS.find(x=>x.id===id);if(st)return {ch:st,lv:"set"};const a=ANKI_DECKS.find(x=>x.id===id);if(a)return {ch:a,lv:"anki"};const d=myDecks.find(x=>x.id===id);return d?{ch:d,lv:"my"}:null}
-const lvName=lv=>LEVELS[lv]?LEVELS[lv].name:lv==="anki"?"기본 Anki 덱":lv==="set"?"내 문장":"내 단어장";
+function findCh(id){if(typeof id==="string"&&id.startsWith("ryk-")){const ch=RYOKU&&RYOKU.byId[id];return ch?{ch,lv:"ryoku"}:null}if(id==="myspot"){const c=spotCh();return c?{ch:c,lv:"mid"}:null}for(const lv in CH){const ch=CH[lv].find(c=>c.id===id);if(ch)return {ch,lv}}const al=ALV.find(x=>x.id===id);if(al)return {ch:al,lv:al.tier};const st=SETS.find(x=>x.id===id);if(st)return {ch:st,lv:"set"};const a=ANKI_DECKS.find(x=>x.id===id);if(a)return {ch:a,lv:"anki"};const d=myDecks.find(x=>x.id===id);return d?{ch:d,lv:"my"}:null}
+const lvName=lv=>LEVELS[lv]?LEVELS[lv].name:lv==="anki"?"기본 Anki 덱":lv==="set"?"내 문장":lv==="ryoku"?"녹황색사회 가사":"내 단어장";
 const unesc=s=>String(s).replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&");
 let toastT;function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800)}
 
@@ -1722,7 +1722,7 @@ function bumpStreak(){const s=store.get("streak",{last:"",n:0}),t=dstr(new Date(
 function drawStreak(){const s=store.get("streak",{last:"",n:0}),t=dstr(new Date()),y=dstr(new Date(Date.now()-DAY));$("streak").textContent=s.last===t&&s.n?`연속 ${s.n}일 학습`:s.last===y&&s.n?`연속 ${s.n}일 · 오늘 퀴즈 전`:"오늘 첫 퀴즈 전"}
 
 /* ---------- home ---------- */
-function progress(ch){
+function progress(ch){if(ch.type==="ryoku"){const b=ryokuBest(ch.id),c=ch.count;return `단어 ${c.word} · 해석 ${c.line} · 읽기 ${c.read}`+(b?` · 최고 ${b.s}/${b.n}`:"")}
   if(ch.type==="alv"){const d=alvLevels(ch.tier),st=store.get("alv",{}),n=d.levels.filter(x=>st[x.L]&&st[x.L].done).length;return `완료 ${n}/${d.levels.length} · 단어 ${d.V} · 한자 ${d.K}`}
   if(ch.type==="kdays"){const d=kdDone();return d?`레슨 ${d}/${KDAYS.length} 완료`:`${KDAYS.length}일 코스`}
   if(ch.type==="kana"){const q=store.get("kq_"+ch.script,null),w=store.get("kw_"+ch.script,[]).length;return [q&&q.total?`정답률 ${Math.round(q.right/q.total*100)}%`:"",w?`따라 쓰기 ${w}/46`:""].filter(Boolean).join(" · ")}
@@ -1864,7 +1864,7 @@ function renderHome(){
   $("goalCard").innerHTML=goalCardHTML();$("toReport").onclick=()=>openReport(null);
   $("startCard").innerHTML=startCardHTML();$("startBtn").onclick=openMenu;
   $("trackCard").innerHTML=track==="jlpt"?jlptCard():talkCard();
-  $("songCard").innerHTML=songCardHTML();if($("songOpen"))$("songOpen").onclick=()=>openChapter((spotCh()||findCh("myjpop").ch),null);if($("spotBtn"))$("spotBtn").onclick=loadMySpotify;if($("spotReset"))$("spotReset").onclick=()=>{spot=null;spotMemo=null;try{localStorage.removeItem("nh2_myspot")}catch(e){}renderHome();toast("예시 플레이리스트로 되돌렸어요.")};
+  $("ryokuCard").innerHTML=ryokuCardHTML();$("ryokuOpen").onclick=()=>openRyoku();$("ryokuMix").onclick=()=>openRyoku(true);$("songCard").innerHTML=songCardHTML();if($("songOpen"))$("songOpen").onclick=()=>openChapter((spotCh()||findCh("myjpop").ch),null);if($("spotBtn"))$("spotBtn").onclick=loadMySpotify;if($("spotReset"))$("spotReset").onclick=()=>{spot=null;spotMemo=null;try{localStorage.removeItem("nh2_myspot")}catch(e){}renderHome();toast("예시 플레이리스트로 되돌렸어요.")};
   if(track==="jlpt"){$("tgSeg").onclick=e=>{const b=e.target.closest("button");if(!b)return;target=b.dataset.n;store.set("target",target);renderHome()};
     if($("toRec"))$("toRec").onclick=()=>{const t=TG_LV[target||({kana:"N5",beg:"N5",mid:"N3",adv:"N2",top:"N1"})[level]],own=tierOf(lvOf(xp));tierView=t===own?null:t;store.set("tierView",tierView);renderHome()}}
   $("fgSeg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.f===fmode));
@@ -1895,7 +1895,7 @@ $("fgSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b
 $("back").onclick=()=>{if(backFn){const f=backFn;backFn=null;f();window.scrollTo(0,0);return}$("chapter").hidden=true;$("home").hidden=false;renderHome();window.scrollTo(0,0)};
 
 function openPage(label,title,fn,back){backFn=back||null;if(quizActive){quizActive=false;if(pendingPromo)setTimeout(flushPromo,500)}if(view!=="roadmap"&&view!=="chapter")rmTrack=null;forceRom=false;$("romTg").hidden=!showRom();setPron(pron);$("home").hidden=true;$("chapter").hidden=false;$("chLevel").textContent=label;$("chTitle").textContent=title;fn();window.scrollTo(0,0)}
-function openChapter(ch,back){view="chapter";const lab=SETS.includes(ch)?"내 문장":TRACK[track].name+" · "+LEVELS[level].name;openPage(lab,ch.title,()=>{forceRom=!!ch.forceRom;if(forceRom)$("romTg").hidden=true;({kana:renderKana,deck:renderDeck,lesson:renderLesson,kdays:renderKDays,alv:renderALV})[ch.type](ch)},back)}
+function openChapter(ch,back){view="chapter";const lab=SETS.includes(ch)?"내 문장":ch.type==="ryoku"?"녹황색사회 가사":TRACK[track].name+" · "+LEVELS[level].name;openPage(lab,ch.title,()=>{forceRom=!!ch.forceRom;if(forceRom)$("romTg").hidden=true;({kana:renderKana,deck:renderDeck,lesson:renderLesson,kdays:renderKDays,alv:renderALV,ryoku:renderRyoku})[ch.type](ch)},back)}
 
 /* ---------- kana ---------- */
 function renderKana(ch){
@@ -2376,11 +2376,282 @@ function showOnboard(step){
   $("obSkip").onclick=skipOnboard;
 }
 
+/* 녹황색사회 가사 퀴즈: 곡의 원문·해석·[공부]로 문제를 만든다. 가사 노트(ryokulyrics)와 broco Nihongo가 같은 코드를 쓴다.
+   곡 = { id, title, ko, lines: [{ jp, ko }], items: [{ line, term, mean, gram }] }  (line은 0부터 센 가사 줄 번호)
+   문제 = { key, kind: "word" | "line" | "read", q, c: [정답, 오답, 오답, 오답], e, line, term, mean, song }  (c의 첫 번째가 정답) */
+const RQ = (() => {
+  const FURI = /\{([^{}|]+)\|([^{}|]+)(?:\|N[1-5])?\}/g;
+  const plain = s => String(s).replace(FURI, "$1");
+  const reading = s => String(s).replace(FURI, "$2");
+  const KANJI = /[㐀-鿿々]/;
+  const JAPANESE = /[぀-ヿ㐀-鿿々]/;
+  const HIRA = /^[ぁ-ゟー]+$/;
+  const same = s => plain(s).normalize("NFKC").replace(/[\s、。,.!?！？「」'"‘’“”]/g, "");
+  const hash = s => { let h = 2166136261; for (const ch of s) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); };
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  // 오답 후보: t = 보기 글, k = 그 글이 풀이하는 낱말이나 가사 줄. 같은 낱말·같은 줄의 다른 풀이는 정답과 뜻이 같을 수 있어서 오답으로 쓰지 않는다.
+  // 후보는 글자 수별로 묶어 두고(idx[글자 수]), 정답과 길이가 가까운 묶음부터 고른다.
+  const entry = (t, k) => ({ t, k: same(k), s: same(t), n: plain(t).length });
+  function lenIndex(list) { const m = []; for (const c of list) if (c.s) (m[c.n] ||= []).push(c); return m; }
+  function pickWrong(right, idx, n, not, taken) {
+    const seen = new Set([same(right), ...(taken || []).map(same)]), skip = same(not), len = plain(right).length, out = [];
+    for (let d = 0; out.length < n && (len - d >= 0 || len + d < idx.length); d++) {
+      for (const c of shuffle([...(idx[len - d] || []), ...(d ? idx[len + d] || [] : [])])) {
+        if (seen.has(c.s) || c.k === skip) continue;
+        seen.add(c.s); out.push(c.t);
+        if (out.length >= n) break;
+      }
+    }
+    return out;
+  }
+
+  // 읽기 문제의 오답: 탁음·장음·작은 っ·ゅ/ょ처럼 헷갈리기 쉬운 쪽으로 한자 읽기를 살짝 바꾼다.
+  // end가 false면(뒤에 送り仮名가 이어지면) 끝에 장음을 붙이지 않는다(迷う → まようう 같은 보기가 생기지 않게).
+  const PAIRS = ["かが", "きぎ", "くぐ", "けげ", "こご", "さざ", "しじ", "すず", "せぜ", "そぞ", "ただ", "てで", "とど", "はばぱ", "ひびぴ", "ふぶぷ", "へべぺ", "ほぼぽ"];
+  const SWAP = {};
+  for (const p of PAIRS) for (const c of p) SWAP[c] = [...p].filter(x => x !== c);
+  const O_ROW = /[おこそとのほもよろごぞどぼぽょ]/, E_ROW = /[えけせてねへめれげぜでべぺ]/;
+  function misreads(r, end = true) {
+    const M = [...r], out = new Set();
+    const at = (i, ...x) => { const s = [...M.slice(0, i), ...x, ...M.slice(i + 1)].join(""); if (s && s !== r) out.add(s); };
+    M.forEach((c, i) => {
+      if (SWAP[c] && M[i - 1] !== "っ") SWAP[c].forEach(x => at(i, x));
+      if (c === "う" && i > 0 && O_ROW.test(M[i - 1])) at(i);
+      if (end && O_ROW.test(c) && M[i + 1] !== "う" && i === M.length - 1) at(i, c, "う");
+      if (c === "い" && i > 0 && E_ROW.test(M[i - 1])) at(i);
+      if (c === "っ") { at(i); at(i, "つ"); }
+      if (/[くつち]/.test(c) && i + 1 < M.length && /[かきくけこさしすせそたちつてとぱぴぷぺぽ]/.test(M[i + 1])) at(i, "っ");
+      if (c === "ゅ") at(i, "ょ");
+      if (c === "ょ") at(i, "ゅ");
+    });
+    return [...out];
+  }
+  const fine = s => s.length >= 2 && !/^[っんーゃゅょ]|っ$|っっ|っん|んっ/.test(s);
+
+  // 낱말을 한자 칸({迷|まよ})과 보이는 가나 칸(う)으로 나눈다. frame은 한자 칸을 □로 바꾼 모양(迷う → □う).
+  const SEG = /\{([^{}|]+)\|([^{}|]+)(?:\|N[1-5])?\}|([^{}]+)/g;
+  const segs = term => [...String(term).matchAll(SEG)].map(m => m[3] != null ? { kana: m[3] } : { kanji: m[1], read: m[2] });
+  const frame = ss => ss.map(s => s.kana != null ? s.kana : "□").join("");
+  const build = (ss, i, v) => ss.map((s, j) => s.kana != null ? s.kana : j === i ? v : s.read).join("");
+
+  // 읽기 문제로 낼 수 있는 [공부] 항목: 한자가 있고, 후리가나가 달려 있고, 읽기가 히라가나뿐인 짧은 낱말
+  function readable(term) {
+    const p = plain(term);
+    return KANJI.test(p) && /\{/.test(term) && !/[～〜~=＝→·・、,\s/()（）]/.test(p) && p.length <= 8 && HIRA.test(reading(term));
+  }
+
+  // 읽기 오답 3개. 보이는 가나(送り仮名)는 정답과 똑같이 두고 한자 읽기만 바꾼다.
+  // 1) 한자 읽기를 헷갈리기 쉽게 바꾼 것 2) 모양이 같은 다른 낱말의 읽기(迷う → 思う·歌う의 읽기)
+  // 3) 한자 칸 하나를 다른 낱말의 한자 읽기로 바꾼 것 4) 보이는 가나가 없는 낱말만: 길이가 비슷한 다른 읽기
+  function readWrong(term, all) {
+    const ss = segs(term), r = reading(term), slots = ss.map((s, i) => s.kana == null ? i : -1).filter(i => i >= 0), out = new Set();
+    slots.forEach(i => { for (const v of misreads(ss[i].read, i === ss.length - 1)) { const c = build(ss, i, v); if (c !== r && fine(c)) out.add(c); } });
+    let wrong = shuffle([...out]).slice(0, 3);
+    if (wrong.length < 3) wrong = wrong.concat(pickWrong(r, all.frames[frame(ss)] || [], 3 - wrong.length, term, wrong));
+    for (let tries = 0; wrong.length < 3 && slots.length && tries < 8; tries++) {
+      const i = slots[Math.floor(Math.random() * slots.length)], [v] = pickWrong(ss[i].read, all.segReads, 1, ss[i].kanji);
+      if (!v) break;
+      const c = build(ss, i, v);
+      if (c !== r && fine(c) && !wrong.includes(c)) wrong.push(c);
+    }
+    if (wrong.length < 3 && ss.every(s => s.kana == null)) wrong = wrong.concat(pickWrong(r, all.reads, 3 - wrong.length, term, wrong));
+    return wrong;
+  }
+
+  // 모든 곡에서 모은 오답 후보: 한 곡 안에서 오답이 모자랄 때 쓴다
+  function pool(songs) {
+    const items = songs.flatMap(s => s.items.filter(it => it.term && it.mean)), rd = items.filter(it => readable(it.term)), frames = {};
+    for (const it of rd) (frames[frame(segs(it.term))] ||= []).push(entry(reading(it.term), it.term));
+    for (const k in frames) frames[k] = lenIndex(frames[k]);
+    return {
+      means: { true: lenIndex(items.filter(it => it.gram).map(it => entry(it.mean, it.term))), false: lenIndex(items.filter(it => !it.gram).map(it => entry(it.mean, it.term))) },
+      lines: lenIndex(songs.flatMap(s => s.lines.filter(l => l.ko).map(l => entry(l.ko, l.jp)))),
+      reads: lenIndex(rd.map(it => entry(reading(it.term), it.term))),
+      frames,
+      segReads: lenIndex(rd.flatMap(it => segs(it.term).filter(s => s.kana == null).map(s => entry(s.read, s.kanji)))),
+    };
+  }
+
+  function bank(song, all) {
+    const qs = [], done = new Set();
+    const add = (kind, id, q) => { const key = `${song.id}:${kind[0]}${hash(id)}`; if (done.has(key)) return; done.add(key); qs.push({ key, kind, song, ...q }); };
+    const lineOf = i => song.lines[i] || null;
+    const items = song.items.filter(it => it.term && it.mean);
+    // 1. 단어 뜻 고르기: [공부]의 '낱말 - 뜻'. 오답은 같은 곡의 낱말(문법이면 문법) 뜻에서 먼저 고른다.
+    const kin = { true: lenIndex(items.filter(it => it.gram).map(it => entry(it.mean, it.term))), false: lenIndex(items.filter(it => !it.gram).map(it => entry(it.mean, it.term))) };
+    for (const it of items) {
+      let wrong = pickWrong(it.mean, kin[it.gram], 3, it.term);
+      if (wrong.length < 3) wrong = wrong.concat(pickWrong(it.mean, all.means[it.gram], 3 - wrong.length, it.term, wrong));
+      if (wrong.length < 3) continue;
+      const l = lineOf(it.line);
+      add("word", same(it.term), { q: `「${it.term}」의 뜻은?`, c: [it.mean, ...wrong], term: it.term, mean: it.mean, line: it.line,
+        e: `${plain(it.term)} - ${it.mean}${l ? ` · 가사 ${it.line + 1}번째 줄: ${plain(l.jp)}` : ""}` });
+    }
+    // 2. 가사 줄 해석 고르기: 원문 한 줄과 그 줄의 해석 (추임새처럼 해석이 원문과 같은 줄은 뺀다)
+    const kos = lenIndex(song.lines.filter(l => l.ko).map(l => entry(l.ko, l.jp)));
+    song.lines.forEach((l, i) => {
+      if (!l.ko || !JAPANESE.test(plain(l.jp)) || same(l.ko) === same(l.jp)) return;
+      let wrong = pickWrong(l.ko, kos, 3, l.jp);
+      if (wrong.length < 3) wrong = wrong.concat(pickWrong(l.ko, all.lines, 3 - wrong.length, l.jp, wrong));
+      if (wrong.length < 3) return;
+      add("line", same(l.jp), { q: l.jp, c: [l.ko, ...wrong], line: i, e: `${plain(l.jp)} → ${l.ko}` });
+    });
+    // 3. 읽기 맞히기: 한자가 들어간 [공부] 낱말
+    for (const it of items) {
+      if (!readable(it.term)) continue;
+      const r = reading(it.term), wrong = readWrong(it.term, all);
+      if (wrong.length < 3) continue;
+      add("read", plain(it.term), { q: `「${plain(it.term)}」의 읽기는?`, c: [r, ...wrong], term: it.term, mean: it.mean, line: it.line,
+        e: `${plain(it.term)}(${r}) - ${it.mean}` });
+    }
+    return qs;
+  }
+
+  // 문제 뽑기: 고른 종류를 번갈아 가며 n문제
+  function pick(qs, kinds, n) {
+    const by = {};
+    for (const k of kinds) by[k] = shuffle(qs.filter(q => q.kind === k));
+    const out = [];
+    for (let i = 0; out.length < n && kinds.some(k => by[k].length); i++) {
+      const k = kinds[i % kinds.length];
+      if (by[k].length) out.push(by[k].pop());
+    }
+    return shuffle(out);
+  }
+
+  return { plain, reading, readable, misreads, readWrong, pool, bank, pick, shuffle, hash };
+})();
+/* ---------- 녹황색사회 가사 퀴즈 ---------- */
+/* 가사 노트(brocokr.github.io/ryokulyrics)의 원문·해석·[공부]를 그때그때 읽어 와서 문제를 만든다. 가사 노트를 고쳐 올리면 여기도 바로 바뀐다.
+   곡 하나가 챕터 하나(id "ryk-앨범-번호", type "ryoku")이고, 문제 열쇠는 "ryk-앨범-번호:종류+해시"라서 오답 노트에도 그대로 모인다. */
+const RYOKU_SITE="https://brocokr.github.io/ryokulyrics/";
+const RYOKU_BASE=/^(brocokr\.github\.io|localhost|127\.0\.0\.1)$/.test(location.hostname)?"/ryokulyrics/":RYOKU_SITE;
+const RYOKU_GROUPS={full:"정규 앨범",sub:"서브 앨범",single:"싱글",etc:"그 외의 곡"};
+const RYOKU_KIND={word:"단어 뜻",line:"가사 해석",read:"읽기"};
+let RYOKU=null,ryokuWait=null;
+function ryokuParse(text){
+  const a=text.indexOf("`"),b=text.lastIndexOf("`"),songs={};let cur=null,sec=null;
+  if(a<0||b<=a)return songs;
+  for(const raw of text.slice(a+1,b).split(/\r?\n/)){
+    const line=raw.replace(/\s+$/,""),head=line.match(/^\s*###\s*(\d+)/);
+    if(head){cur=songs[+head[1]]={원문:[],발음:[],한글발음:[],해석:[],공부:[],메모:[]};sec=null;continue}
+    if(!cur||/^\s*\/\//.test(line))continue;
+    const s=line.match(/^\s*\[(원문|발음|한글발음|해석|공부|메모)\]\s*$/);
+    if(s)sec=s[1];else if(sec)cur[sec].push(line);
+  }
+  return songs;
+}
+// [공부] 칸: 숫자만 있는 줄이 가사 줄 번호, 그 아래 '낱말 - 뜻' 줄이 항목. 들여 쓴 줄(자세한 설명)은 퀴즈에 쓰지 않는다.
+function ryokuNotes(lines){
+  const out=[];let cur=null;
+  for(const l of lines||[]){const s=l.trim();if(!s)continue;
+    const num=s.match(/^(\d+)\s*(?:번째\s*줄|번째|번|줄|\.|\))?$/);if(num){cur=+num[1]-1;continue}
+    if(/^\s/.test(l)||cur==null)continue;
+    const m=s.match(/^(.*?)\s+[-:]\s+(.*)$/);if(!m)continue;
+    out.push({line:cur,term:m[1],mean:m[2],gram:/^[～〜~]|=|→/.test(m[1])});
+  }
+  return out;
+}
+const ryNorm=s=>s.normalize("NFKC").toLowerCase().replace(/\s+/g,"");
+const ryHas=a=>!!a&&a.some(l=>l.trim());
+function loadRyoku(){
+  if(RYOKU)return Promise.resolve(RYOKU);
+  return ryokuWait||(ryokuWait=(async()=>{
+    const html=await (await fetch(RYOKU_BASE+"index.html",{cache:"no-cache"})).text(),m=html.match(/\/\*ALBUMS\*\/([\s\S]*?)\/\*END\*\//);
+    if(!m)throw new Error("albums");
+    const albums=JSON.parse(m[1]);
+    const files=await Promise.all(albums.map(al=>fetch(RYOKU_BASE+"가사/"+encodeURIComponent(al.file)+".js",{cache:"no-cache"}).then(r=>r.ok?r.text():"").catch(()=>"")));
+    const tracks=[];
+    albums.forEach((al,ai)=>{const L=ryokuParse(files[ai]);al.tracks.forEach(([jp,ko],i)=>{if((al.inst||{})[i+1])return;tracks.push({al,no:i+1,jp,ko:ko||"",d:L[i+1]||null})})});
+    // 같은 곡이 두 앨범에 실리면 가사가 있는 쪽을 빌려 쓰고, 퀴즈에는 앞 앨범의 것 하나만 넣는다(가사 노트와 같은 규칙)
+    const songs=[],seen=new Set();
+    for(const t of tracks){
+      const k=ryNorm(t.jp);if(seen.has(k))continue;
+      const d=t.d&&ryHas(t.d.원문)?t.d:(tracks.find(o=>o!==t&&ryNorm(o.jp)===k&&o.d&&ryHas(o.d.원문))||{}).d;
+      if(!d)continue;
+      const nb=a=>a.filter(l=>l.trim()),jpL=nb(d.원문),koL=nb(d.해석),items=ryokuNotes(d.공부);
+      if(!items.length&&!koL.length)continue;
+      seen.add(k);
+      songs.push({id:`ryk-${t.al.key}-${t.no}`,t,title:t.jp,ko:t.ko,lines:jpL.map((jp,i)=>({jp,ko:koL[i]||""})),items});
+    }
+    const all=RQ.pool(songs),byId={},list=[];
+    for(const s of songs){
+      const bank=RQ.bank(s,all).map(ryokuItem);if(!bank.length)continue;
+      const n=k=>bank.filter(q=>q.kind===k).length;
+      const ch={id:s.id,type:"ryoku",tag:"가사",title:esc(s.title),desc:esc([s.ko,s.t.al.label+(s.t.al.tracks.length>1?` ${s.t.no}번`:"")].filter(Boolean).join(" · ")),
+        quiz:[],bank,qmap:Object.fromEntries(bank.map(q=>[q.key.split(":")[1],q])),items:s.items,song:s,group:s.t.al.group,count:{word:n("word"),line:n("line"),read:n("read")},
+        link:`${RYOKU_SITE}#/s/${s.t.al.key}/${s.t.no}`};
+      byId[ch.id]=ch;list.push(ch);
+    }
+    RYOKU={songs:list,byId};
+    return RYOKU;
+  })().catch(e=>{ryokuWait=null;throw e}));
+}
+// RQ의 문제를 runQuiz 모양으로: 문제·보기는 HTML로 그리므로 글자를 이스케이프하고, 읽기 문제의 한자는 로마자가 붙지 않게 따로 감싼다
+function ryokuItem(q){
+  const src=esc(q.song.title)+" · "+RYOKU_KIND[q.kind];
+  const html=q.kind==="line"?`이 가사의 해석은?<br><span class='jp'>${esc(q.q)}</span>`
+    :q.kind==="read"?`이 낱말의 읽기는?<br><span class="jp">${esc(RQ.plain(q.term))}</span>${q.mean?`<br><span class="sub" style="font-size:14px">뜻: ${esc(RQ.plain(q.mean))}</span>`:""}`
+    :`이 낱말의 뜻은?<br><span class='jp'>${esc(q.term)}</span>`;
+  return {key:q.key,kind:q.kind,q:html,c:q.c.map(esc),e:q.e,type:typeOfTag["가사"],src};
+}
+function ryokuBest(id){const b=store.get("best_"+id,null);return b&&typeof b==="object"?b:null}
+function ryokuQuiz(items,title,back,ch){
+  runQuiz(items,{ask:true,showSrc:!ch,
+    onAnswer:(q,ok)=>{if(ok)delete wrong.q[q.key];else wrong.q[q.key]=(wrong.q[q.key]||0)+1;saveWrong()},
+    onDone:(score,wr,n)=>{
+      let best=null;if(ch){const b=ryokuBest(ch.id);best=!b||score/n>b.s/b.n||(score/n===b.s/b.n&&n>b.n)?{s:score,n}:b;store.set("best_"+ch.id,best)}
+      const body=$("chBody");
+      body.innerHTML=`<div class="card"><span class="label">${title}</span><div class="result">${score} / ${n}</div><p class="sub" style="margin:0">${best?`이 곡 최고 점수 ${best.s} / ${best.n}`:""}${wr.length?`${best?" · ":""}틀린 ${wr.length}문제는 오답 노트에 모았어요`:""}</p>
+        ${wr.length?`<div class="review"><span class="label">틀린 문제</span>${wr.map(q=>`<div>${R(q.q)}<br><b>정답: ${R(q.c[0])}</b><br><span class="sub">${esc(q.e)}</span></div>`).join("")}</div>`:`<p style="margin:0">모두 맞혔어요.</p>`}
+        <div style="display:flex;gap:8px;width:100%"><button class="btn ghost" id="ryBack" style="flex:1">${ch?"곡 화면으로":"곡 목록으로"}</button><button class="btn" id="ryAgain" style="flex:1">다시 풀기</button></div></div>`;
+      $("ryBack").onclick=()=>{back();window.scrollTo(0,0)};$("ryAgain").onclick=()=>ryokuQuiz(RQ.pick(ch?ch.bank:RYOKU.songs.flatMap(c=>c.bank),items.kinds||Object.keys(RYOKU_KIND),10),title,back,ch);
+    }});
+}
+function renderRyoku(ch){
+  const body=$("chBody"),b=ryokuBest(ch.id),c=ch.count;
+  const kinds=Object.keys(RYOKU_KIND).filter(k=>c[k]);
+  body.innerHTML=`<p class="intro">녹황색사회 가사 노트에 정리한 해석과 단어·문법으로 문제를 내요. 틀린 문제는 오답 노트에 모이고, 맞히면 빠져요.</p>
+    <div class="stats">${Object.entries(RYOKU_KIND).map(([k,v])=>`<div class="stat"><b>${c[k]}</b><span>${v} 문제</span></div>`).join("")}</div>
+    <button class="btn wide" id="ryMix">섞어서 10문제${b?` · 최고 ${b.s}/${b.n}`:""}</button>
+    <div class="actions">${kinds.map(k=>`<button class="btn ghost small" data-k="${k}" style="flex:1">${RYOKU_KIND[k]}만 10문제</button>`).join("")}</div>
+    <a class="splink" href="${ch.link}" target="_blank" rel="noopener">${IC.music} 가사 노트에서 전체 가사 보기</a>
+    ${ch.items.length?`<details class="box wlinfo"><summary>단어·문법 목록 · ${ch.items.length}개</summary>${ch.items.map(it=>`<div class="wrow"><span class="label">${it.line+1}번째 줄${it.gram?" · 문법":""}</span><span><b class="jp">${R(esc(it.term))}</b> · ${esc(it.mean)}</span></div>`).join("")}</details>`:""}`;
+  const go=ks=>{const items=RQ.pick(ch.bank,ks,10);items.kinds=ks;ryokuQuiz(items,ch.title,()=>openChapter(ch,()=>openRyoku()),ch)};
+  $("ryMix").onclick=()=>go(kinds);
+  body.querySelector(".actions").onclick=e=>{const k=e.target.closest("[data-k]");if(k)go([k.dataset.k])};
+}
+function openRyoku(mix){
+  view="ryoku";
+  openPage("녹황색사회 가사","가사 퀴즈",()=>{
+    const body=$("chBody");$("romTg").hidden=!showRom();
+    if(!RYOKU){
+      body.innerHTML=`<p class="intro">가사 노트에서 곡을 불러오는 중이에요…</p>`;
+      loadRyoku().then(()=>{if(view==="ryoku")openRyoku(mix)},()=>{if(view!=="ryoku")return;body.innerHTML=`<div class="card"><p style="margin:0">가사 노트를 불러오지 못했어요.</p><p class="sub" style="margin:0">인터넷 연결을 확인하고 다시 시도해 주세요.</p><button class="btn wide" id="ryRetry">다시 시도</button></div>`;$("ryRetry").onclick=()=>openRyoku(mix)});
+      return;
+    }
+    if(mix){const items=RQ.pick(RYOKU.songs.flatMap(c=>c.bank),Object.keys(RYOKU_KIND),10);ryokuQuiz(items,"전체 곡에서 섞어 풀기",()=>openRyoku(),null);return}
+    const nW=RYOKU.songs.reduce((a,c)=>a+c.count.word,0),nL=RYOKU.songs.reduce((a,c)=>a+c.count.line,0),nR=RYOKU.songs.reduce((a,c)=>a+c.count.read,0);
+    body.innerHTML=`<p class="intro">녹황색사회 가사 노트에서 해석과 단어·문법을 정리한 ${RYOKU.songs.length}곡이에요. 곡을 고르면 그 곡의 단어 뜻·가사 해석·읽기 문제를 풀 수 있어요.</p>
+      <div class="stats"><div class="stat"><b>${nW}</b><span>단어 뜻</span></div><div class="stat"><b>${nL}</b><span>가사 해석</span></div><div class="stat"><b>${nR}</b><span>읽기</span></div></div>
+      <button class="btn wide" id="ryAll">전체 곡에서 섞어 10문제</button>
+      <div class="chapters" id="ryList" data-l="${level}">${Object.entries(RYOKU_GROUPS).map(([g,name])=>{const l=RYOKU.songs.filter(c=>c.group===g);return l.length?`<span class="label grp">${name}</span>`+l.map(c=>chBtn(c.id)).join(""):""}).join("")}</div>
+      <p class="note">가사 노트를 고쳐 올리면 문제도 함께 바뀌어요.</p>`;
+    $("ryAll").onclick=()=>openRyoku(true);
+    $("ryList").onclick=e=>{const b=e.target.closest(".ch");if(!b)return;const f=findCh(b.dataset.id);if(f)openChapter(f.ch,()=>openRyoku())};
+  },mix?()=>openRyoku():null);
+}
+function ryokuCardHTML(){
+  return `<div class="tcard"><span class="label songlbl">${IC.music} 녹황색사회 가사로 공부</span><p style="margin:0"><b>가사 노트에 정리한 곡으로 퀴즈 풀기</b><br><span class="sub">단어 뜻 · 가사 해석 · 읽기${RYOKU?` · ${RYOKU.songs.length}곡`:""} · 틀린 문제는 오답 노트로</span></p>
+    <div class="actions"><button class="btn small" id="ryokuOpen">곡 고르기</button><button class="btn ghost small" id="ryokuMix">섞어서 10문제</button></div></div>`;
+}
+
 /* ---------- wrong notes ---------- */
 function openWrong(back){view="wrong";openPage("복습","오답 노트",drawWrong,back===undefined?openMenu:back)}
-function drawWrong(){
+function drawWrong(){if(!RYOKU&&Object.keys(wrong.q).some(k=>k.startsWith("ryk-")))loadRyoku().then(()=>{if(view==="wrong")drawWrong()},()=>{});
   const body=$("chBody");
-  const qItems=Object.keys(wrong.q).map(key=>{const [cid,k]=key.split(":"),f=findCh(cid),q=f&&f.ch.quiz[+k];return q?{...q,key,type:typeOfTag[f.ch.tag],src:lvName(f.lv)+" · "+f.ch.title}:null}).filter(Boolean);
+  const qItems=Object.keys(wrong.q).map(key=>{const [cid,k]=key.split(":"),f=findCh(cid),q=f&&(f.ch.qmap?f.ch.qmap[k]:f.ch.quiz[+k]);return q?{...q,key,type:typeOfTag[f.ch.tag],src:lvName(f.lv)+" · "+f.ch.title}:null}).filter(Boolean);
   const cItems=Object.keys(wrong.c).map(id=>{const [cid,k]=id.split(":"),f=findCh(cid),c=f&&f.ch.cards[+k];return c?{id,c,ruby:f.ch.front==="ruby",src:lvName(f.lv)+" · "+f.ch.title}:null}).filter(Boolean);
   const kana=[["h"],["k"]].flatMap(([s])=>{const st=store.get("kq_"+s,null);return st?Object.entries(st.miss).map(([h,n])=>({ch:s==="h"?h:toKata(h),n,rom:KANA.find(x=>x.h===h).rom})):[]});
   const empty=!qItems.length&&!cItems.length&&!kana.length;
@@ -2657,7 +2928,7 @@ function autoAnswer(q){
   if(q.ref){const [cid,k]=q.ref.key.split(":"),f=findCh(cid);
     if(f&&q.ref.kind==="card"){const c=f.ch.cards[+k];if(c){const [w,m,ex,ko,note]=c,kj=[...new Set([...plain(w)])].filter(x=>KJ[x]).map(x=>`${x}(${KJ[x][0]})`).join(", ");
       return `‘${plain(w)}’는 ${reading(w)}로 읽고, 뜻은 ‘${m}’예요.${kj?` 한자로는 ${kj}로 이루어져 있어요.`:""}${note?` ${note}`:""} 예문 「${plain(ex)}」(${ko})처럼 써요.`}}
-    if(f&&q.ref.kind==="quiz"){const it=f.ch.quiz[+k];if(it)return `정답은 ‘${textOf(it.c[0])}’예요. ${it.e} 같은 표현으로 예문을 하나 직접 만들어 보면 오래 기억에 남아요.`}}
+    if(f&&q.ref.kind==="quiz"){const it=f.ch.qmap?f.ch.qmap[k]:f.ch.quiz[+k];if(it)return `정답은 ‘${textOf(it.c[0])}’예요. ${it.e} 같은 표현으로 예문을 하나 직접 만들어 보면 오래 기억에 남아요.`}}
   return "질문 고마워요. 실제 서비스에서는 배정된 선배가 질문을 읽고 직접 답변을 작성해요. 지금 보이는 답변은 데모용 자동 응답이에요.";
 }
 function tick(){try{settleQs()}catch(e){}
