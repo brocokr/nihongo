@@ -626,7 +626,7 @@ body.pron-off .rom,body.pron-off .han,body.pron-rom .han,body.pron-han .rom:not(
     <div class="topbar">
       <button class="back" id="back" aria-label="챕터 목록으로"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
       <div style="min-width:0"><span class="label" id="chLevel"></span><h2 id="chTitle"></h2></div>
-      <button class="romtg" id="romTg" hidden aria-pressed="true">로마자</button>
+      <button class="romtg" id="romTg" hidden aria-pressed="true">로마자</button><button class="romtg" id="ryTg" hidden aria-pressed="false">영어 발음 꺼짐</button>
     </div>
     <div id="chBody" class="stack"></div>
   </section>
@@ -1722,7 +1722,7 @@ function bumpStreak(){const s=store.get("streak",{last:"",n:0}),t=dstr(new Date(
 function drawStreak(){const s=store.get("streak",{last:"",n:0}),t=dstr(new Date()),y=dstr(new Date(Date.now()-DAY));$("streak").textContent=s.last===t&&s.n?`연속 ${s.n}일 학습`:s.last===y&&s.n?`연속 ${s.n}일 · 오늘 퀴즈 전`:"오늘 첫 퀴즈 전"}
 
 /* ---------- home ---------- */
-function progress(ch){if(ch.type==="ryoku"){const b=ryokuBest(ch.id),c=ch.count;return `단어 ${c.word} · 해석 ${c.line} · 읽기 ${c.read}`+(b?` · 최고 ${b.s}/${b.n}`:"")}
+function progress(ch){if(ch.type==="ryoku"){const b=ryokuBest(ch.id),c=ch.count;return `단어 ${c.word}`+(ch.level!=null?"":` · 문법 ${c.gram}`)+` · 읽기 ${c.read}`+(b?` · 최고 ${b.s}/${b.n}`:"")}
   if(ch.type==="alv"){const d=alvLevels(ch.tier),st=store.get("alv",{}),n=d.levels.filter(x=>st[x.L]&&st[x.L].done).length;return `완료 ${n}/${d.levels.length} · 단어 ${d.V} · 한자 ${d.K}`}
   if(ch.type==="kdays"){const d=kdDone();return d?`레슨 ${d}/${KDAYS.length} 완료`:`${KDAYS.length}일 코스`}
   if(ch.type==="kana"){const q=store.get("kq_"+ch.script,null),w=store.get("kw_"+ch.script,[]).length;return [q&&q.total?`정답률 ${Math.round(q.right/q.total*100)}%`:"",w?`따라 쓰기 ${w}/46`:""].filter(Boolean).join(" · ")}
@@ -1787,7 +1787,7 @@ function openMenu(){view="menu";openPage(`${TRACK[track].name} · ${LEVELS[level
 function chBtn(id,lock){const c=findCh(id).ch,p=progress(c);return `<button class="ch${lock?" locked":""}" data-id="${id}"${lock?' data-locked="1"':""}><span class="tag">${c.tag}</span><span class="txt"><b>${c.title}</b><span>${c.desc}</span>${p?`<em>${p}</em>`:""}</span>${lock?LOCK_IC:'<svg class="go" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>'}</button>`}
 function renderMenu(){
   const body=$("chBody"),lk=stageLocked(level),c=lk?null:nextChapter(),r=c?chRatio(c):0,started=r>0,diag=store.get("diag",null);
-  const nWrong=Object.keys(wrong.q).length+Object.keys(wrong.c).length,nNew=Qs.filter(q=>q.status==="done"&&!q.seen).length,nOpen=Qs.filter(isOpen).length,nFav=Object.keys(fav).length;
+  const nWrong=Object.keys(wrong.q).filter(ryokuLive).length+Object.keys(wrong.c).length,nNew=Qs.filter(q=>q.status==="done"&&!q.seen).length,nOpen=Qs.filter(isOpen).length,nFav=Object.keys(fav).length;
   body.innerHTML=`${lk?lockBanner(level):""}${c?`<button class="startcard" id="mRec"><span class="st-l"><span class="label">${started?"이어서 학습하기":"추천 챕터"}</span><b>${c.title}</b><span class="sub">${c.desc}${started?` · 진행 ${Math.round(r*100)}%`:""}</span></span><span class="st-go">${started?"계속":"시작"}</span></button>`:""}
     ${(()=>{const ids=(TRACKS[track][level].find(([g])=>g===ANKI_GRP)||["",[]])[1];return ids.length?`<span class="label">${ANKI_GRP} · ${LEVELS[level].name} 단계</span>
     <div class="chapters" id="mAnki" data-l="${level}">${ids.map(id=>chBtn(id,lk)).join("")}</div>`:""})()}
@@ -1894,7 +1894,7 @@ $("lvCard").addEventListener("click",e=>{if(e.target.closest("#lvAll")){openRoad
 $("fgSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;fmode=b.dataset.f;store.set("fmode",fmode);renderHome()});
 $("back").onclick=()=>{if(backFn){const f=backFn;backFn=null;f();window.scrollTo(0,0);return}$("chapter").hidden=true;$("home").hidden=false;renderHome();window.scrollTo(0,0)};
 
-function openPage(label,title,fn,back){backFn=back||null;if(quizActive){quizActive=false;if(pendingPromo)setTimeout(flushPromo,500)}if(view!=="roadmap"&&view!=="chapter")rmTrack=null;forceRom=false;$("romTg").hidden=!showRom();setPron(pron);$("home").hidden=true;$("chapter").hidden=false;$("chLevel").textContent=label;$("chTitle").textContent=title;fn();window.scrollTo(0,0)}
+function openPage(label,title,fn,back){backFn=back||null;if(quizActive){quizActive=false;if(pendingPromo)setTimeout(flushPromo,500)}if(view!=="roadmap"&&view!=="chapter")rmTrack=null;forceRom=false;$("romTg").hidden=!showRom();$("ryTg").hidden=true;setPron(pron);$("home").hidden=true;$("chapter").hidden=false;$("chLevel").textContent=label;$("chTitle").textContent=title;fn();window.scrollTo(0,0)}
 function openChapter(ch,back){view="chapter";const lab=SETS.includes(ch)?"내 문장":ch.type==="ryoku"?"녹황색사회 가사":TRACK[track].name+" · "+LEVELS[level].name;openPage(lab,ch.title,()=>{forceRom=!!ch.forceRom;if(forceRom)$("romTg").hidden=true;({kana:renderKana,deck:renderDeck,lesson:renderLesson,kdays:renderKDays,alv:renderALV,ryoku:renderRyoku})[ch.type](ch)},back)}
 
 /* ---------- kana ---------- */
@@ -2376,18 +2376,21 @@ function showOnboard(step){
   $("obSkip").onclick=skipOnboard;
 }
 
-/* 녹황색사회 가사 퀴즈: 곡의 원문·해석·[공부]로 문제를 만든다. 가사 노트(ryokulyrics)와 broco Nihongo가 같은 코드를 쓴다.
-   곡 = { id, title, ko, lines: [{ jp, ko }], items: [{ line, term, mean, gram }] }  (line은 0부터 센 가사 줄 번호)
-   문제 = { key, kind: "word" | "line" | "read", q, c: [정답, 오답, 오답, 오답], e, line, term, mean, song }  (c의 첫 번째가 정답) */
+/* 녹황색사회 가사 퀴즈: 곡의 [공부](단어·문법)로 문제를 만든다. 가사 노트(ryokulyrics)와 broco Nihongo가 같은 코드를 쓴다.
+   곡 = { id, title, ko, lines: [{ jp }], items: [{ line, term, mean, gram }] }  (line은 0부터 센 가사 줄 번호)
+   문제 = { key, kind: "word" | "gram" | "read", q, c: [정답, 오답, 오답, 오답], e, line, term, mean, lv, song }  (c의 첫 번째가 정답) */
 const RQ = (() => {
   const FURI = /\{([^{}|]+)\|([^{}|]+)(?:\|N[1-5])?\}/g;
   const plain = s => String(s).replace(FURI, "$1");
   const reading = s => String(s).replace(FURI, "$2");
   const KANJI = /[㐀-鿿々]/;
-  const JAPANESE = /[぀-ヿ㐀-鿿々]/;
   const HIRA = /^[ぁ-ゟー]+$/;
   const same = s => plain(s).normalize("NFKC").replace(/[\s、。,.!?！？「」'"‘’“”]/g, "");
   const hash = s => { let h = 2166136261; for (const ch of s) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); };
+  // JLPT 급수표(jlpt.js)의 열쇠: "후리가나를 뺀 글자|읽기"
+  const lvKey = term => `${plain(term)}|${reading(term)}`;
+  // 퀴즈에 쓰는 [공부] 항목: 낱말과 뜻이 있는 것. 급수표에 0으로 적힌 말(영어, 노랫말 소리, 이름, 지어낸 말)은 문제로 내지 않는다.
+  const usable = (it, levels) => it.term && it.mean && (it.gram || levels[lvKey(it.term)] !== 0);
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
   // 오답 후보: t = 보기 글, k = 그 글이 풀이하는 낱말이나 가사 줄. 같은 낱말·같은 줄의 다른 풀이는 정답과 뜻이 같을 수 있어서 오답으로 쓰지 않는다.
@@ -2460,49 +2463,41 @@ const RQ = (() => {
   }
 
   // 모든 곡에서 모은 오답 후보: 한 곡 안에서 오답이 모자랄 때 쓴다
-  function pool(songs) {
-    const items = songs.flatMap(s => s.items.filter(it => it.term && it.mean)), rd = items.filter(it => readable(it.term)), frames = {};
+  function pool(songs, levels) {
+    const items = songs.flatMap(s => s.items.filter(it => usable(it, levels || {}))), rd = items.filter(it => readable(it.term)), frames = {};
     for (const it of rd) (frames[frame(segs(it.term))] ||= []).push(entry(reading(it.term), it.term));
     for (const k in frames) frames[k] = lenIndex(frames[k]);
     return {
       means: { true: lenIndex(items.filter(it => it.gram).map(it => entry(it.mean, it.term))), false: lenIndex(items.filter(it => !it.gram).map(it => entry(it.mean, it.term))) },
-      lines: lenIndex(songs.flatMap(s => s.lines.filter(l => l.ko).map(l => entry(l.ko, l.jp)))),
       reads: lenIndex(rd.map(it => entry(reading(it.term), it.term))),
       frames,
+      levels: levels || {},
       segReads: lenIndex(rd.flatMap(it => segs(it.term).filter(s => s.kana == null).map(s => entry(s.read, s.kanji)))),
     };
   }
 
   function bank(song, all) {
     const qs = [], done = new Set();
-    const add = (kind, id, q) => { const key = `${song.id}:${kind[0]}${hash(id)}`; if (done.has(key)) return; done.add(key); qs.push({ key, kind, song, ...q }); };
+    // 열쇠 글자: 단어와 문법은 w, 읽기는 r (문법을 따로 나누기 전에 모인 틀린 문제도 이어지게 문법도 w를 쓴다)
+    const add = (kind, id, q) => { const key = `${song.id}:${kind === "read" ? "r" : "w"}${hash(id)}`; if (done.has(key)) return; done.add(key); qs.push({ key, kind, song, ...q }); };
     const lineOf = i => song.lines[i] || null;
-    const items = song.items.filter(it => it.term && it.mean);
-    // 1. 단어 뜻 고르기: [공부]의 '낱말 - 뜻'. 오답은 같은 곡의 낱말(문법이면 문법) 뜻에서 먼저 고른다.
+    const items = song.items.filter(it => usable(it, all.levels));
+    // 1. 단어·문법 뜻 고르기: [공부]의 '낱말 - 뜻'. 오답은 같은 곡의 낱말(문법이면 문법) 뜻에서 먼저 고른다.
     const kin = { true: lenIndex(items.filter(it => it.gram).map(it => entry(it.mean, it.term))), false: lenIndex(items.filter(it => !it.gram).map(it => entry(it.mean, it.term))) };
     for (const it of items) {
       let wrong = pickWrong(it.mean, kin[it.gram], 3, it.term);
       if (wrong.length < 3) wrong = wrong.concat(pickWrong(it.mean, all.means[it.gram], 3 - wrong.length, it.term, wrong));
       if (wrong.length < 3) continue;
       const l = lineOf(it.line);
-      add("word", same(it.term), { q: `「${it.term}」의 뜻은?`, c: [it.mean, ...wrong], term: it.term, mean: it.mean, line: it.line,
+      add(it.gram ? "gram" : "word", same(it.term), { q: `「${it.term}」의 뜻은?`, c: [it.mean, ...wrong], term: it.term, mean: it.mean, line: it.line, lv: all.levels[lvKey(it.term)] || "",
         e: `${plain(it.term)} - ${it.mean}${l ? ` · 가사 ${it.line + 1}번째 줄: ${plain(l.jp)}` : ""}` });
     }
-    // 2. 가사 줄 해석 고르기: 원문 한 줄과 그 줄의 해석 (추임새처럼 해석이 원문과 같은 줄은 뺀다)
-    const kos = lenIndex(song.lines.filter(l => l.ko).map(l => entry(l.ko, l.jp)));
-    song.lines.forEach((l, i) => {
-      if (!l.ko || !JAPANESE.test(plain(l.jp)) || same(l.ko) === same(l.jp)) return;
-      let wrong = pickWrong(l.ko, kos, 3, l.jp);
-      if (wrong.length < 3) wrong = wrong.concat(pickWrong(l.ko, all.lines, 3 - wrong.length, l.jp, wrong));
-      if (wrong.length < 3) return;
-      add("line", same(l.jp), { q: l.jp, c: [l.ko, ...wrong], line: i, e: `${plain(l.jp)} → ${l.ko}` });
-    });
-    // 3. 읽기 맞히기: 한자가 들어간 [공부] 낱말
+    // 2. 읽기 맞히기: 한자가 들어간 [공부] 낱말
     for (const it of items) {
       if (!readable(it.term)) continue;
       const r = reading(it.term), wrong = readWrong(it.term, all);
       if (wrong.length < 3) continue;
-      add("read", plain(it.term), { q: `「${plain(it.term)}」의 읽기는?`, c: [r, ...wrong], term: it.term, mean: it.mean, line: it.line,
+      add("read", plain(it.term), { q: `「${plain(it.term)}」의 읽기는?`, c: [r, ...wrong], term: it.term, mean: it.mean, line: it.line, lv: all.levels[lvKey(it.term)] || "",
         e: `${plain(it.term)}(${r}) - ${it.mean}` });
     }
     return qs;
@@ -2520,15 +2515,96 @@ const RQ = (() => {
     return shuffle(out);
   }
 
-  return { plain, reading, readable, misreads, readWrong, pool, bank, pick, shuffle, hash };
+  // JLPT 급수별로 나누기: n = 5~1, 그 급수의 단어·읽기 문제. 문법은 급수가 없어서 넣지 않는다.
+  // 급수가 없어 Anki 덱 단계로 짐작한 b·m·a는 걸치는 급수에 모두, 어림한 e5~e1은 그 급수에 넣는다. 같은 낱말이 여러 곡에 나오면 그중 한 곡의 것만 낸다.
+  const BAND = { b: [5], m: [4, 3], a: [2, 1], e5: [5], e4: [4], e3: [3], e2: [2], e1: [1] };
+  const levelsOf = lv => BAND[lv] || (lv ? [lv] : []);
+  function byLevel(qs, n) {
+    const seen = new Set();
+    return shuffle(qs).filter(q => {
+      if (q.kind === "gram") return false;
+      const k = `${q.kind}|${lvKey(q.term)}`;
+      if (!levelsOf(q.lv).includes(n) || seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  }
+
+  // 읽기 문제의 보기(가나)를 그 낱말의 {한자|읽기} 모양으로 되돌린다(로마자를 조사·送り仮名에 맞게 붙이려고). 붙어 있는 한자 칸은 하나로 본다.
+  function markRead(term, kana) {
+    const ss = [];
+    for (const s of segs(term)) { const p = ss[ss.length - 1]; if (s.kana == null && p && p.kana == null) p.kanji += s.kanji; else ss.push({ ...s }); }
+    const m = new RegExp("^" + ss.map(s => s.kana == null ? "(.+?)" : s.kana.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("") + "$").exec(kana);
+    if (!m) return kana;
+    let i = 0;
+    return ss.map(s => s.kana == null ? `{${s.kanji}|${m[++i]}}` : s.kana).join("");
+  }
+
+  // 영어 발음(로마자): [공부] 낱말 하나를 헵번식으로 바꾼다. 긴 소리는 ou, uu처럼 소리 나는 글자로 풀어 쓰고, 조사 앞뒤는 띄운다(雨が降る → ame ga furu).
+  const ROMA = { あ: "a", い: "i", う: "u", え: "e", お: "o", か: "ka", き: "ki", く: "ku", け: "ke", こ: "ko", さ: "sa", し: "shi", す: "su", せ: "se", そ: "so", た: "ta", ち: "chi", つ: "tsu", て: "te", と: "to", な: "na", に: "ni", ぬ: "nu", ね: "ne", の: "no", は: "ha", ひ: "hi", ふ: "fu", へ: "he", ほ: "ho", ま: "ma", み: "mi", む: "mu", め: "me", も: "mo", や: "ya", ゆ: "yu", よ: "yo", ら: "ra", り: "ri", る: "ru", れ: "re", ろ: "ro", わ: "wa", を: "o", が: "ga", ぎ: "gi", ぐ: "gu", げ: "ge", ご: "go", ざ: "za", じ: "ji", ず: "zu", ぜ: "ze", ぞ: "zo", だ: "da", ぢ: "ji", づ: "zu", で: "de", ど: "do", ば: "ba", び: "bi", ぶ: "bu", べ: "be", ぼ: "bo", ぱ: "pa", ぴ: "pi", ぷ: "pu", ぺ: "pe", ぽ: "po", ゔ: "vu", ぁ: "a", ぃ: "i", ぅ: "u", ぇ: "e", ぉ: "o" };
+  const hira = s => s.replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+  function kanaRom(s) {
+    s = hira(s);
+    let out = "";
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i], n = s[i + 1] || "", r = ROMA[c];
+      if (c === "ー") { const m = /[aeiou](?=[^aeiou]*$)/.exec(out); out += m ? m[0] : ""; }
+      else if (c === "っ") { const x = kanaRom(s.slice(i + 1, i + 3)); out += x.startsWith("ch") ? "t" : /^[^aeiou]/.test(x) ? x[0] : ""; }
+      else if (c === "ん") out += "n" + (/^[aeiouy]/.test(n && kanaRom(n)) ? "'" : "");
+      else if (r === undefined) out += c === "？" ? "?" : c === "！" ? "!" : c;
+      else if (n && "ゃゅょ".includes(n)) { const y = { ゃ: "a", ゅ: "u", ょ: "o" }[n]; out += /^(sh|ch|j)/.test(r) ? r.slice(0, -1) + y : r.slice(0, -1) + "y" + y; i++; }
+      else if (n && "ぁぃぅぇぉ".includes(n) && r.length > 1 && !r.endsWith(ROMA[n])) { out += r.slice(0, -1) + ROMA[n]; i++; }
+      else out += r;
+    }
+    return out;
+  }
+  // 낱말로만 봐서는 어디서 끊는지 알 수 없는 말(가나로만 적은 표현, は·へ가 조사인 말). 왼쪽은 후리가나를 뺀 글자.
+  const ROM_FIX = { いいよね: "ii yo ne", いいさ: "ii sa", あのね: "ano ne", だね: "da ne", だよ: "da yo", よね: "yo ne", またね: "mata ne", ごめんね: "gomen ne", でもね: "demo ne", ほらね: "hora ne", ここはもう: "koko wa mou", ここから: "koko kara", ここまで: "koko made", これから: "kore kara", これまで: "kore made", これが: "kore ga", それが: "sore ga", それも: "sore mo", それでいい: "sore de ii", それだけ: "sore dake", それだけで: "sore dake de", それだけでいい: "sore dake de ii", それだけなの: "sore dake na no", それだけのこと: "sore dake no koto", それって: "sore tte", それもいいね: "sore mo ii ne", そうです: "sou desu", そうだ: "sou da", そんなの: "sonna no", そんなはずない: "sonna hazu nai", そんなふうに: "sonna fuu ni", こんなの: "konna no", このまま: "kono mama", すぐそこ: "sugu soko", どうかな: "dou kana", どうしたの: "doushita no", どうしてかな: "doushite kana", どうだろう: "dou darou", どうやったか: "dou yatta ka", どうでもいい: "dou demo ii", どうしようもない: "dou shiyou mo nai", どこへ: "doko e", どこまで: "doko made", どこまでも: "doko made mo", どちらも: "dochira mo", どれも: "dore mo", そのどちらも: "sono dochira mo", いつから: "itsu kara", いつかは: "itsuka wa", たまには: "tama ni wa", なんでもいい: "nandemo ii", もうない: "mou nai", もんね: "mon ne", あなたがいれば: "anata ga ireba", あれもこれも: "are mo kore mo", ひとつだけ: "hitotsu dake", ひとつずつ: "hitotsu zutsu", ひとりで: "hitori de", ほんとの: "honto no", みんなで: "minna de", じゃないの: "ja nai no", 私のもの: "watashi no mono", その代わりに: "sono kawari ni" };
+  const PART = { は: "わ", へ: "え", を: "お", には: "に わ", では: "で わ", とは: "と わ", にも: "に も" };
+  function spaced(term) {
+    const ss = segs(term), kj = s => !!s && s.kana == null;
+    let out = "";
+    ss.forEach((s, i) => {
+      if (kj(s)) { out += s.read; return; }
+      const prev = kj(ss[i - 1]), next = kj(ss[i + 1]);
+      let k = hira(s.kana).replace(/くはない/g, "く わ ない").replace(/ではない/g, "で わ ない");
+      const m = prev && /^(ら|たち)?(から|まで|だけ|でも|なら|ならば|すぐ|こそ|さえ|より|には|では|とは|にも|が|を|に|は|も|の|と|で|へ|な)$/.exec(k);
+      if (m && !(m[2] === "な" && !next)) k = `${m[1] || ""} ${PART[m[2]] || m[2]}${next ? " " : ""}`;
+      else if (prev) {
+        k = k.replace(/^(ら|たち|つ)(が|を|に|は|も|の|と|で)$/, (x, a, b) => `${a} ${PART[b] || b}`)
+          .replace(/^を(?=.)/, " お ")
+          .replace(/^(が|に|は|も|の|と)(?=(する|した|して|しな|され|させ|なる|なっ|なれ|なら|ない|ある|いる|いれ|いい|かか|でる|でき|わか|つく|くる|いう))/, (x, a) => ` ${PART[a] || a} `)
+          .replace(/^(しか)(ない|できない)$/, " $1 $2").replace(/^じゃない/, " じゃ ない")
+          .replace(/く(なる|なって|なった|させる|する)$/, "く $1")
+          .replace(/([うくぐすつぬぶむるいた])かな$/, "$1 かな").replace(/([うくぐすつぬぶむるいたて])([ねよ])$/, "$1 $2").replace(/(.)(だけ|ずつ)$/, "$1 $2").replace(/([うくぐすつぬぶむる])まま$/, "$1 まま");
+        if (next) k = k.replace(/^([^\s]{1,3})([にをがはも])$/, (x, a, b) => `${a} ${PART[b] || b} `);
+        if (next && !k.endsWith(" ") && /(しい|たい|ない|きい|るい|ろい|な|た|たり|だり|[うくぐすつぬぶむる])$/.test(k)) k += " ";
+      }
+      else if (next && /^(この|その|あの|どの|もう|あと|そう|こう|どう|まだ|また|ただ|これ|それ|あれ|ずっと|とても|おもちゃ|ガラス|がらす|こんな|そんな|どんな)$/.test(k)) k += " ";
+      out += k;
+    });
+    return out;
+  }
+  function romaji(term) {
+    const p = plain(term);
+    if (ROM_FIX[p]) return ROM_FIX[p];
+    if (/～/.test(term)) return term.split("～").map(x => romaji(x)).join(" ~ ").trim();
+    if (/・/.test(term)) return term.split("・").map(x => romaji(x)).join(" / ");
+    if (segs(term).some(s => s.kana != null && KANJI.test(s.kana))) return "";
+    return spaced(term.replace(/[(（]を[)）]/g, "を")).split(/\s+/).filter(Boolean).map(kanaRom).join(" ");
+  }
+
+  return { plain, reading, lvKey, readable, misreads, readWrong, pool, bank, pick, byLevel, markRead, romaji, shuffle, hash };
 })();
 /* ---------- 녹황색사회 가사 퀴즈 ---------- */
-/* 가사 노트(brocokr.github.io/ryokulyrics)의 원문·해석·[공부]를 그때그때 읽어 와서 문제를 만든다. 가사 노트를 고쳐 올리면 여기도 바로 바뀐다.
-   곡 하나가 챕터 하나(id "ryk-앨범-번호", type "ryoku")이고, 문제 열쇠는 "ryk-앨범-번호:종류+해시"라서 오답 노트에도 그대로 모인다. */
+/* 가사 노트(brocokr.github.io/ryokulyrics)의 [공부](단어·문법)를 그때그때 읽어 와서 문제를 만든다. 가사 노트를 고쳐 올리면 여기도 바로 바뀐다.
+   곡 하나가 챕터 하나(id "ryk-앨범-번호", type "ryoku")이고, 문제 열쇠는 "ryk-앨범-번호:종류+해시"라서 오답 노트에도 그대로 모인다.
+   JLPT 급수도 챕터 하나씩(id "ryk-n5" … "ryk-n1")이고, 문제는 곡의 것을 그대로 쓴다. */
 const RYOKU_SITE="https://brocokr.github.io/ryokulyrics/";
 const RYOKU_BASE=/^(brocokr\.github\.io|localhost|127\.0\.0\.1)$/.test(location.hostname)?"/ryokulyrics/":RYOKU_SITE;
 const RYOKU_GROUPS={full:"정규 앨범",sub:"서브 앨범",single:"싱글",etc:"그 외의 곡"};
-const RYOKU_KIND={word:"단어 뜻",line:"가사 해석",read:"읽기"};
+const RYOKU_KIND={word:"단어",gram:"문법",read:"읽기"};
+const ryokuCount=bank=>{const n=k=>bank.filter(q=>q.kind===k).length;return {word:n("word"),gram:n("gram"),read:n("read")}};
 let RYOKU=null,ryokuWait=null;
 function ryokuParse(text){
   const a=text.indexOf("`"),b=text.lastIndexOf("`"),songs={};let cur=null,sec=null;
@@ -2561,6 +2637,8 @@ function loadRyoku(){
     const html=await (await fetch(RYOKU_BASE+"index.html",{cache:"no-cache"})).text(),m=html.match(/\/\*ALBUMS\*\/([\s\S]*?)\/\*END\*\//);
     if(!m)throw new Error("albums");
     const albums=JSON.parse(m[1]);
+    // jlpt.js: 퀴즈 단어의 JLPT 급수표. 못 읽어도 급수 표시만 빠진다.
+    const levels=await fetch(RYOKU_BASE+"jlpt.js",{cache:"no-cache"}).then(r=>r.ok?r.text():"").then(t=>{const m=t.match(/\{[\s\S]*\}/);return m?JSON.parse(m[0]):{}}).catch(()=>({}));
     const files=await Promise.all(albums.map(al=>fetch(RYOKU_BASE+"가사/"+encodeURIComponent(al.file)+".js",{cache:"no-cache"}).then(r=>r.ok?r.text():"").catch(()=>"")));
     const tracks=[];
     albums.forEach((al,ai)=>{const L=ryokuParse(files[ai]);al.tracks.forEach(([jp,ko],i)=>{if((al.inst||{})[i+1])return;tracks.push({al,no:i+1,jp,ko:ko||"",d:L[i+1]||null})})});
@@ -2570,54 +2648,78 @@ function loadRyoku(){
       const k=ryNorm(t.jp);if(seen.has(k))continue;
       const d=t.d&&ryHas(t.d.원문)?t.d:(tracks.find(o=>o!==t&&ryNorm(o.jp)===k&&o.d&&ryHas(o.d.원문))||{}).d;
       if(!d)continue;
-      const nb=a=>a.filter(l=>l.trim()),jpL=nb(d.원문),koL=nb(d.해석),items=ryokuNotes(d.공부);
-      if(!items.length&&!koL.length)continue;
+      const items=ryokuNotes(d.공부);
+      if(!items.length)continue;
       seen.add(k);
-      songs.push({id:`ryk-${t.al.key}-${t.no}`,t,title:t.jp,ko:t.ko,lines:jpL.map((jp,i)=>({jp,ko:koL[i]||""})),items});
+      songs.push({id:`ryk-${t.al.key}-${t.no}`,t,title:t.jp,ko:t.ko,lines:d.원문.filter(l=>l.trim()).map(jp=>({jp})),items});
     }
-    const all=RQ.pool(songs),byId={},list=[];
+    const all=RQ.pool(songs,levels),byId={},list=[];
     for(const s of songs){
       const bank=RQ.bank(s,all).map(ryokuItem);if(!bank.length)continue;
-      const n=k=>bank.filter(q=>q.kind===k).length;
       const ch={id:s.id,type:"ryoku",tag:"가사",title:esc(s.title),desc:esc([s.ko,s.t.al.label+(s.t.al.tracks.length>1?` ${s.t.no}번`:"")].filter(Boolean).join(" · ")),
-        quiz:[],bank,qmap:Object.fromEntries(bank.map(q=>[q.key.split(":")[1],q])),items:s.items,song:s,group:s.t.al.group,count:{word:n("word"),line:n("line"),read:n("read")},
+        quiz:[],bank,qmap:Object.fromEntries(bank.map(q=>[q.key.split(":")[1],q])),items:s.items,song:s,group:s.t.al.group,count:ryokuCount(bank),
         link:`${RYOKU_SITE}#/s/${s.t.al.key}/${s.t.no}`};
       byId[ch.id]=ch;list.push(ch);
     }
-    RYOKU={songs:list,byId};
+    // JLPT 급수별 챕터. 급수표(jlpt.js)를 못 읽었으면 만들지 않는다.
+    const lvs=[];
+    if(Object.keys(levels).length)for(const n of [5,4,3,2,1]){
+      const bank=RQ.byLevel(list.flatMap(c=>c.bank),n);if(!bank.length)continue;
+      const ch={id:"ryk-n"+n,type:"ryoku",tag:"N"+n,title:`JLPT N${n}`,desc:`가사에 나온 N${n} 낱말`,
+        quiz:[],bank,qmap:{},items:[],level:n,words:bank.filter(q=>q.kind==="word"),count:ryokuCount(bank),link:`${RYOKU_SITE}#/quiz/n${n}`};
+      byId[ch.id]=ch;lvs.push(ch);
+    }
+    RYOKU={songs:list,lvs,byId,levels};
     return RYOKU;
   })().catch(e=>{ryokuWait=null;throw e}));
 }
+// 급수 글자: 1~5는 사전·JLPT 단어 목록의 급수, b·m·a는 Anki 단어 덱 단계로 짐작한 것, e1~e5는 목록에 없어 어림한 것
+const ryokuLvText=v=>({b:"N5 (Anki)",m:"N4~N3 (Anki)",a:"N2~N1 (Anki)"})[v]||(/^e\d$/.test(v)?`JLPT N${v[1]}`:`JLPT N${v}`);
+const ryokuLvHTML=v=>` <span style="display:inline-block;vertical-align:middle;margin-left:4px;padding:0 8px;font-size:12px;font-weight:700;line-height:1.7;color:var(--accent);border:1px solid var(--accent);border-radius:999px">${esc(ryokuLvText(v))}</span>`;
+// 영어 발음(로마자): N5·N4 급수 챕터에서만. 위쪽 ryTg 버튼으로 켜고 끄며 처음에는 꺼져 있다(store "ryRom").
+// 글자는 CSS로 넣어서(data-r) 보기 길이 계산이나 질문 글에 섞이지 않는다. 이 챕터에서는 앱 전체의 발음 버튼(romTg)은 쓰지 않는다.
+const ROM_LEVELS=[5,4];
+document.head.insertAdjacentHTML("beforeend",`<style>.ryrom{display:none;font-family:var(--f-mono);font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:.02em;line-height:1.45}.ryrom::after{content:attr(data-r)}body.ry-rom .ryrom{display:block}</style>`);
+const ryRom=r=>r?`<span class="ryrom" data-r="${esc(r).replace(/"/g,"&quot;")}"></span>`:"";
+function setRyRom(on){store.set("ryRom",on);drawRyRom()}
+function drawRyRom(){const on=store.get("ryRom",false)===true,t=$("ryTg");document.body.classList.toggle("ry-rom",on);t.setAttribute("aria-pressed",on);t.textContent=on?"영어 발음 켜짐":"영어 발음 꺼짐"}
+function showRyRom(){$("romTg").hidden=true;$("ryTg").hidden=false;$("ryTg").onclick=()=>setRyRom(store.get("ryRom",false)!==true);drawRyRom()}
+const ryRomItem=q=>({...q,q:q.kind==="read"?q.q:q.q+ryRom(RQ.romaji(q.term)),c:q.kind==="read"?q.c.map(x=>x+ryRom(RQ.romaji(RQ.markRead(q.term,x)))):q.c});
 // RQ의 문제를 runQuiz 모양으로: 문제·보기는 HTML로 그리므로 글자를 이스케이프하고, 읽기 문제의 한자는 로마자가 붙지 않게 따로 감싼다
 function ryokuItem(q){
-  const src=esc(q.song.title)+" · "+RYOKU_KIND[q.kind];
-  const html=q.kind==="line"?`이 가사의 해석은?<br><span class='jp'>${esc(q.q)}</span>`
-    :q.kind==="read"?`이 낱말의 읽기는?<br><span class="jp">${esc(RQ.plain(q.term))}</span>${q.mean?`<br><span class="sub" style="font-size:14px">뜻: ${esc(RQ.plain(q.mean))}</span>`:""}`
-    :`이 낱말의 뜻은?<br><span class='jp'>${esc(q.term)}</span>`;
-  return {key:q.key,kind:q.kind,q:html,c:q.c.map(esc),e:q.e,type:typeOfTag["가사"],src};
+  const src=esc(q.song.title)+" · "+RYOKU_KIND[q.kind],lv=q.lv?ryokuLvHTML(q.lv):"";
+  const html=q.kind==="read"?`이 낱말의 읽기는?${lv}<br><span class="jp">${esc(RQ.plain(q.term))}</span>${q.mean?`<br><span class="sub" style="font-size:14px">뜻: ${esc(RQ.plain(q.mean))}</span>`:""}`
+    :`이 ${q.kind==="gram"?"문법":"낱말"}의 뜻은?${lv}<br><span class='jp'>${esc(q.term)}</span>`;
+  return {key:q.key,kind:q.kind,term:q.term,mean:q.mean,lv:q.lv,title:q.song.title,q:html,c:q.c.map(esc),e:q.e,type:typeOfTag["가사"],src};
 }
+// 오답 노트의 문제가 아직 있는지(없앤 '가사 해석' 문제나 뺀 낱말이 오답 수에 섞이지 않게). 곡을 아직 안 불러왔으면 있다고 본다.
+function ryokuLive(k){if(!k.startsWith("ryk-"))return true;const [c,q]=k.split(":");if(q[0]==="l")return false;try{return !RYOKU||!!(RYOKU.byId[c]&&RYOKU.byId[c].qmap[q])}catch(e){return true}}
 function ryokuBest(id){const b=store.get("best_"+id,null);return b&&typeof b==="object"?b:null}
 function ryokuQuiz(items,title,back,ch){
-  runQuiz(items,{ask:true,showSrc:!ch,
+  const isLv=!!ch&&ch.level!=null,rom=isLv&&ROM_LEVELS.includes(ch.level),kinds=items.kinds;
+  if(rom){items=items.map(ryRomItem);items.kinds=kinds}
+  runQuiz(items,{ask:true,showSrc:!ch||isLv,noRom:rom,
     onAnswer:(q,ok)=>{if(ok)delete wrong.q[q.key];else wrong.q[q.key]=(wrong.q[q.key]||0)+1;saveWrong()},
     onDone:(score,wr,n)=>{
       let best=null;if(ch){const b=ryokuBest(ch.id);best=!b||score/n>b.s/b.n||(score/n===b.s/b.n&&n>b.n)?{s:score,n}:b;store.set("best_"+ch.id,best)}
       const body=$("chBody");
-      body.innerHTML=`<div class="card"><span class="label">${title}</span><div class="result">${score} / ${n}</div><p class="sub" style="margin:0">${best?`이 곡 최고 점수 ${best.s} / ${best.n}`:""}${wr.length?`${best?" · ":""}틀린 ${wr.length}문제는 오답 노트에 모았어요`:""}</p>
+      body.innerHTML=`<div class="card"><span class="label">${title}</span><div class="result">${score} / ${n}</div><p class="sub" style="margin:0">${best?`${isLv?"이 급수":"이 곡"} 최고 점수 ${best.s} / ${best.n}`:""}${wr.length?`${best?" · ":""}틀린 ${wr.length}문제는 오답 노트에 모았어요`:""}</p>
         ${wr.length?`<div class="review"><span class="label">틀린 문제</span>${wr.map(q=>`<div>${R(q.q)}<br><b>정답: ${R(q.c[0])}</b><br><span class="sub">${esc(q.e)}</span></div>`).join("")}</div>`:`<p style="margin:0">모두 맞혔어요.</p>`}
-        <div style="display:flex;gap:8px;width:100%"><button class="btn ghost" id="ryBack" style="flex:1">${ch?"곡 화면으로":"곡 목록으로"}</button><button class="btn" id="ryAgain" style="flex:1">다시 풀기</button></div></div>`;
+        <div style="display:flex;gap:8px;width:100%"><button class="btn ghost" id="ryBack" style="flex:1">${isLv?"급수 화면으로":ch?"곡 화면으로":"곡 목록으로"}</button><button class="btn" id="ryAgain" style="flex:1">다시 풀기</button></div></div>`;
       $("ryBack").onclick=()=>{back();window.scrollTo(0,0)};$("ryAgain").onclick=()=>ryokuQuiz(RQ.pick(ch?ch.bank:RYOKU.songs.flatMap(c=>c.bank),items.kinds||Object.keys(RYOKU_KIND),10),title,back,ch);
     }});
 }
 function renderRyoku(ch){
   const body=$("chBody"),b=ryokuBest(ch.id),c=ch.count;
-  const kinds=Object.keys(RYOKU_KIND).filter(k=>c[k]);
-  body.innerHTML=`<p class="intro">녹황색사회 가사 노트에 정리한 해석과 단어·문법으로 문제를 내요. 틀린 문제는 오답 노트에 모이고, 맞히면 빠져요.</p>
-    <div class="stats">${Object.entries(RYOKU_KIND).map(([k,v])=>`<div class="stat"><b>${c[k]}</b><span>${v} 문제</span></div>`).join("")}</div>
+  if(ROM_LEVELS.includes(ch.level))showRyRom();
+  const kinds=Object.keys(RYOKU_KIND).filter(k=>c[k]),isLv=ch.level!=null,shown=Object.entries(RYOKU_KIND).filter(([k])=>!isLv||k!=="gram");
+  body.innerHTML=`<p class="intro">${isLv?`녹황색사회 가사에 나온 JLPT N${ch.level} 낱말이에요. 문법은 급수가 없어서 단어와 읽기 문제만 나와요.${ROM_LEVELS.includes(ch.level)?" 위쪽 버튼으로 영어 발음을 켜고 끌 수 있어요.":""}`:"녹황색사회 가사 노트에 정리한 단어와 문법으로 문제를 내요."} 틀린 문제는 오답 노트에 모이고, 맞히면 빠져요.</p>
+    <div class="stats"${isLv?' style="grid-template-columns:repeat(2,1fr)"':""}>${shown.map(([k,v])=>`<div class="stat"><b>${c[k]}</b><span>${v} 문제</span></div>`).join("")}</div>
     <button class="btn wide" id="ryMix">섞어서 10문제${b?` · 최고 ${b.s}/${b.n}`:""}</button>
     <div class="actions">${kinds.map(k=>`<button class="btn ghost small" data-k="${k}" style="flex:1">${RYOKU_KIND[k]}만 10문제</button>`).join("")}</div>
-    <a class="splink" href="${ch.link}" target="_blank" rel="noopener">${IC.music} 가사 노트에서 전체 가사 보기</a>
-    ${ch.items.length?`<details class="box wlinfo"><summary>단어·문법 목록 · ${ch.items.length}개</summary>${ch.items.map(it=>`<div class="wrow"><span class="label">${it.line+1}번째 줄${it.gram?" · 문법":""}</span><span><b class="jp">${R(esc(it.term))}</b> · ${esc(it.mean)}</span></div>`).join("")}</details>`:""}`;
+    <a class="splink" href="${ch.link}" target="_blank" rel="noopener">${IC.music} ${isLv?"가사 노트 퀴즈에서 풀기":"가사 노트에서 전체 가사 보기"}</a>
+    ${isLv&&ch.words.length?`<details class="box wlinfo"><summary>단어 목록 · ${ch.words.length}개</summary>${ch.words.slice().sort((a,b)=>RQ.reading(a.term).localeCompare(RQ.reading(b.term),"ja")).map(q=>`<div class="wrow"><span class="label">${esc(q.title)}${/^[bma]$/.test(q.lv)?" · "+esc(ryokuLvText(q.lv)):""}</span><span><b class="jp">${R(esc(q.term))}</b> · ${esc(q.mean)}${ROM_LEVELS.includes(ch.level)?ryRom(RQ.romaji(q.term)):""}</span></div>`).join("")}</details>`:""}
+    ${ch.items.length?`<details class="box wlinfo"><summary>단어·문법 목록 · ${ch.items.length}개</summary>${ch.items.map(it=>`<div class="wrow"><span class="label">${it.line+1}번째 줄${it.gram?" · 문법":""}${!it.gram&&RYOKU.levels[RQ.lvKey(it.term)]?" · "+esc(ryokuLvText(RYOKU.levels[RQ.lvKey(it.term)])):""}</span><span><b class="jp">${R(esc(it.term))}</b> · ${esc(it.mean)}</span></div>`).join("")}</details>`:""}`;
   const go=ks=>{const items=RQ.pick(ch.bank,ks,10);items.kinds=ks;ryokuQuiz(items,ch.title,()=>openChapter(ch,()=>openRyoku()),ch)};
   $("ryMix").onclick=()=>go(kinds);
   body.querySelector(".actions").onclick=e=>{const k=e.target.closest("[data-k]");if(k)go([k.dataset.k])};
@@ -2632,19 +2734,19 @@ function openRyoku(mix){
       return;
     }
     if(mix){const items=RQ.pick(RYOKU.songs.flatMap(c=>c.bank),Object.keys(RYOKU_KIND),10);ryokuQuiz(items,"전체 곡에서 섞어 풀기",()=>openRyoku(),null);return}
-    const nW=RYOKU.songs.reduce((a,c)=>a+c.count.word,0),nL=RYOKU.songs.reduce((a,c)=>a+c.count.line,0),nR=RYOKU.songs.reduce((a,c)=>a+c.count.read,0);
-    body.innerHTML=`<p class="intro">녹황색사회 가사 노트에서 해석과 단어·문법을 정리한 ${RYOKU.songs.length}곡이에요. 곡을 고르면 그 곡의 단어 뜻·가사 해석·읽기 문제를 풀 수 있어요.</p>
-      <div class="stats"><div class="stat"><b>${nW}</b><span>단어 뜻</span></div><div class="stat"><b>${nL}</b><span>가사 해석</span></div><div class="stat"><b>${nR}</b><span>읽기</span></div></div>
+    const sum=k=>RYOKU.songs.reduce((a,c)=>a+c.count[k],0);
+    body.innerHTML=`<p class="intro">녹황색사회 가사 노트에서 단어·문법을 정리한 ${RYOKU.songs.length}곡이에요. 곡이나 JLPT 급수를 고르면 거기 나온 문제를 풀 수 있어요.</p>
+      <div class="stats">${Object.entries(RYOKU_KIND).map(([k,v])=>`<div class="stat"><b>${sum(k)}</b><span>${v}</span></div>`).join("")}</div>
       <button class="btn wide" id="ryAll">전체 곡에서 섞어 10문제</button>
-      <div class="chapters" id="ryList" data-l="${level}">${Object.entries(RYOKU_GROUPS).map(([g,name])=>{const l=RYOKU.songs.filter(c=>c.group===g);return l.length?`<span class="label grp">${name}</span>`+l.map(c=>chBtn(c.id)).join(""):""}).join("")}</div>
+      <div class="chapters" id="ryList" data-l="${level}">${RYOKU.lvs.length?`<span class="label grp">JLPT 급수별</span>`+RYOKU.lvs.map(c=>chBtn(c.id)).join(""):""}${Object.entries(RYOKU_GROUPS).map(([g,name])=>{const l=RYOKU.songs.filter(c=>c.group===g);return l.length?`<span class="label grp">${name}</span>`+l.map(c=>chBtn(c.id)).join(""):""}).join("")}</div>
       <p class="note">가사 노트를 고쳐 올리면 문제도 함께 바뀌어요.</p>`;
     $("ryAll").onclick=()=>openRyoku(true);
     $("ryList").onclick=e=>{const b=e.target.closest(".ch");if(!b)return;const f=findCh(b.dataset.id);if(f)openChapter(f.ch,()=>openRyoku())};
   },mix?()=>openRyoku():null);
 }
 function ryokuCardHTML(){
-  return `<div class="tcard"><span class="label songlbl">${IC.music} 녹황색사회 가사로 공부</span><p style="margin:0"><b>가사 노트에 정리한 곡으로 퀴즈 풀기</b><br><span class="sub">단어 뜻 · 가사 해석 · 읽기${RYOKU?` · ${RYOKU.songs.length}곡`:""} · 틀린 문제는 오답 노트로</span></p>
-    <div class="actions"><button class="btn small" id="ryokuOpen">곡 고르기</button><button class="btn ghost small" id="ryokuMix">섞어서 10문제</button></div></div>`;
+  return `<div class="tcard"><span class="label songlbl">${IC.music} 녹황색사회 가사로 공부</span><p style="margin:0"><b>가사 노트에 정리한 곡으로 퀴즈 풀기</b><br><span class="sub">단어 · 문법 · 읽기 · JLPT 급수별${RYOKU?` · ${RYOKU.songs.length}곡`:""} · 틀린 문제는 오답 노트로</span></p>
+    <div class="actions"><button class="btn small" id="ryokuOpen">곡·급수 고르기</button><button class="btn ghost small" id="ryokuMix">섞어서 10문제</button></div></div>`;
 }
 
 /* ---------- wrong notes ---------- */
