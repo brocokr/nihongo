@@ -2156,6 +2156,7 @@ function renderALV(ch){
   }
   function quiz(Lv){
     backFn=()=>learn(Lv);
+    const lv0=lvOf(xp);
     const x=D.levels.find(y=>y.L===Lv),its=x.items.length>MAXQ?shuffle(x.items).slice(0,MAXQ):x.items,starter=isStarter();
     runQuiz(its.map(i=>alvQ(i,D.pool,starter)),{noRom:true,
       onAnswer:(q,ok)=>{if(!ok&&q.ref){wrong.c[q.ref]=(wrong.c[q.ref]||0)+1;saveWrong()}},
@@ -2167,7 +2168,7 @@ function renderALV(ch){
         const nx=D.levels.find(y=>y.L===Lv+1),nextOpen=nx&&nx.L<=lvOf(xp);
         backFn=()=>{list();window.scrollTo(0,0)};
         body.innerHTML=`<div class="card"><span class="label">${LEVELS[t].name} · Lv.${Lv}</span><div class="result" style="color:${pass?"var(--good)":"var(--bad)"}">${score} / ${n}</div>
-          <p style="margin:0">${pass?(up?`레벨 퀴즈 통과! Lv.${Lv+1}로 올라갔어요.`:"레벨 퀴즈 완료!"):`${need}문제 이상 맞히면 다음 레벨로 올라가요. 단어를 한 번 더 보고 다시 풀어 볼까요?`}${wr.length?" 틀린 단어는 오답 노트에 모았어요.":""}</p>
+          <p style="margin:0">${pass?(lvOf(xp)>lv0?`레벨 퀴즈 통과! Lv.${lvOf(xp)}로 올라갔어요.`:"레벨 퀴즈 통과!"):`${need}문제 이상 맞히면 다음 레벨로 올라가요. 단어를 한 번 더 보고 다시 풀어 볼까요?`}${wr.length?" 틀린 단어는 오답 노트에 모았어요.":""}</p>
           ${wr.length?`<div class="review"><span class="label">틀린 문제</span>${wr.map(q=>`<div>${q.q.replace(/<rt>[^<]*<\/rt>/g,"").replace(/<[^>]+>/g," ")}<br><b>정답: ${q.c[0]}</b><br><span class="sub">${q.e}</span></div>`).join("")}</div>`:""}
           ${pass&&nextOpen?`<button class="btn wide" id="alvNext">Lv.${Lv+1} 퀴즈로</button>`:pass&&nx?`<p class="sub" style="margin:0">Lv.${Lv+1} 퀴즈는 레벨이 오르면 열려요. 다음 레벨까지 ${xpFor(lvOf(xp)+1)-xp} XP 남았어요.</p>`:""}
           <div style="display:flex;gap:8px;width:100%"><button class="btn ghost" id="alvList" style="flex:1">레벨 목록</button><button class="btn ghost" id="alvAgain" style="flex:1">${pass?"다시 풀기":"단어 다시 보기"}</button></div></div>`;
@@ -2354,10 +2355,14 @@ function showOnboard(step){
     $("obBack").onclick=()=>showOnboard("goal");$("obSkip").onclick=skipOnboard;
     diagIntro($("obTest"),(rec,sc,L)=>{
       el.innerHTML=`<div class="obtop"><span></span><span class="label">배치 결과</span></div><div class="card">${diagResultHTML(rec,sc,L)}
-        <button class="btn wide" id="obGo">${obReplay&&xpFor(L)<xp&&lvOf(xp)!==L?`${LEVELS[rec].name} 단계 보기 · 내 레벨 Lv.${lvOf(xp)} 유지`:`Lv.${L}부터 시작하기`}</button>
+        ${obReplay?"":`<button class="btn wide" id="obLesson">Lv.${L} 첫 레슨 바로 시작</button>`}
+        <button class="btn${obReplay?"":" ghost"} wide" id="obGo">${obReplay&&xpFor(L)<xp&&lvOf(xp)!==L?`${LEVELS[rec].name} 단계 보기 · 내 레벨 Lv.${lvOf(xp)} 유지`:obReplay?`Lv.${L}부터 시작하기`:"메인 화면으로"}</button>
         <div class="ob-alt"><span class="sub">배치 결과 대신 다른 단계로 시작</span>${TIERS.filter(t=>t!==rec).map(t=>`<button class="btn ghost small" data-lv="${TIER_START[t]}">${LEVELS[t].name} · Lv.${TIER_START[t]}</button>`).join("")}</div></div>`;
       const go=n=>{const keep=obReplay&&xpFor(n)<=xp;if(!obReplay)xp=0;startAt(n);obReplay=false;store.set("onboarded",true);$("onboard").hidden=true;$("home").hidden=false;renderHome();window.scrollTo(0,0);toast(keep?`${TRACK[track].name} · ${LEVELS[tierOf(n)].name} 단계를 보여 드려요. 내 레벨 Lv.${lvOf(xp)}은 그대로예요.`:`${TRACK[track].name} · Lv.${lvOf(xp)} ${LEVELS[level].name} 단계로 시작해요.`)};
-      $("obGo").onclick=()=>go(L);el.querySelectorAll(".ob-alt [data-lv]").forEach(b=>b.onclick=()=>go(+b.dataset.lv));
+      $("obGo").onclick=()=>go(L);
+      /* first-time learners go straight into the first lesson: 7 of 10 learners stopped between placement and first study */
+      if($("obLesson"))$("obLesson").onclick=()=>{go(L);const c=!stageLocked(level)&&nextChapter();if(c)openChapter(c,null);else openMenu()};
+      el.querySelectorAll(".ob-alt [data-lv]").forEach(b=>b.onclick=()=>go(+b.dataset.lv));
     });
     return;
   }
@@ -3023,7 +3028,7 @@ const isOpen=q=>q.status==="wait"||q.status==="assigned";
 const tutorAvailable=()=>{const h=new Date().getHours();return h>=HOURS[0]&&h<HOURS[1]};
 const load=id=>Qs.filter(q=>q.tutor===id&&q.status==="assigned").length;
 function assign(q,exclude,force){
-  if(!force&&!tutorAvailable()&&!q.sim)return false;
+  if(!force&&!tutorAvailable())return false;
   const pool=TUTORS.filter(t=>t.id!==exclude);if(!pool.length)return false;
   const ranked=pool.slice().sort((a,b)=>(b.spec.includes(q.type)-a.spec.includes(q.type))||(load(a.id)-load(b.id)));
   q.tutor=ranked[0].id;q.status="assigned";q.assignedAt=Date.now();q.late=false;return true;

@@ -38,7 +38,7 @@ service cloud.firestore {
       allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid
         && request.resource.data.status == 'wait'
-        && request.resource.data.text is string && request.resource.data.text.size() <= 400;
+        && request.resource.data.text is string && request.resource.data.text.size() <= 300;
       allow update: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rating', 'status', 'reassignReq'])
         && request.resource.data.status in [resource.data.status, 'cancel']);
